@@ -86,6 +86,7 @@ test('generates native schedules with quoted paths and a private identity', () =
   const c = { node: '/path with spaces/node', interval: 5, windowsUser: 'DOMAIN\\user' };
   const win = scheduleFiles('/private skills', c, 'win32');
   assert.match(win.files[1][1], /<Interval>PT5M<\/Interval>/);
+  assert.deepEqual([...win.files[1][1].matchAll(/<UserId>(.*?)<\/UserId>/g)].map(m => m[1]), ['DOMAIN\\user', 'DOMAIN\\user']);
   assert.match(win.files[0][1], /, 0, True/);
   const mac = scheduleFiles('/private skills', c, 'darwin', '/user');
   assert.match(mac.files[0][1], /<integer>300<\/integer>/);

@@ -15,7 +15,7 @@ export function scheduleFiles(home, config, platform = process.platform, userHom
     const command = `"${config.node}" "${runner}" --home "${home}"`;
     const vbs = `Set shell = CreateObject("WScript.Shell")\nresult = shell.Run("${command.replaceAll('"', '""')}", 0, True)\nWScript.Quit result\n`;
     const start = new Date(Date.now() + 60000).toISOString();
-    const definition = `<?xml version="1.0" encoding="UTF-8"?><Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task"><Triggers><TimeTrigger><Repetition><Interval>PT${config.interval}M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition><StartBoundary>${start}</StartBoundary><Enabled>true</Enabled></TimeTrigger><LogonTrigger><Enabled>true</Enabled></LogonTrigger></Triggers><Principals><Principal id="Author"><UserId>${xml(config.windowsUser)}</UserId><LogonType>InteractiveToken</LogonType><RunLevel>LeastPrivilege</RunLevel></Principal></Principals><Settings><MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy><DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries><StopIfGoingOnBatteries>false</StopIfGoingOnBatteries><StartWhenAvailable>true</StartWhenAvailable><ExecutionTimeLimit>PT5M</ExecutionTimeLimit><Hidden>true</Hidden></Settings><Actions Context="Author"><Exec><Command>${xml(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'wscript.exe'))}</Command><Arguments>"${xml(launch)}"</Arguments><WorkingDirectory>${xml(home)}</WorkingDirectory></Exec></Actions></Task>`;
+    const definition = `<?xml version="1.0" encoding="UTF-16"?><Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task"><Triggers><TimeTrigger><Repetition><Interval>PT${config.interval}M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition><StartBoundary>${start}</StartBoundary><Enabled>true</Enabled></TimeTrigger><LogonTrigger><Enabled>true</Enabled><UserId>${xml(config.windowsUser)}</UserId></LogonTrigger></Triggers><Principals><Principal id="Author"><UserId>${xml(config.windowsUser)}</UserId><LogonType>InteractiveToken</LogonType><RunLevel>LeastPrivilege</RunLevel></Principal></Principals><Settings><MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy><DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries><StopIfGoingOnBatteries>false</StopIfGoingOnBatteries><StartWhenAvailable>true</StartWhenAvailable><ExecutionTimeLimit>PT5M</ExecutionTimeLimit><Hidden>true</Hidden></Settings><Actions Context="Author"><Exec><Command>${xml(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'wscript.exe'))}</Command><Arguments>"${xml(launch)}"</Arguments><WorkingDirectory>${xml(home)}</WorkingDirectory></Exec></Actions></Task>`;
     return { id, kind: 'windows', files: [[launch, vbs], [path.join(home, 'task.xml'), definition]] };
   }
   if (platform === 'darwin') {
@@ -56,7 +56,11 @@ export function registerSchedule(home, config, requested = 'auto') {
     }
     if (systemd.status !== 0) throw Error('No user systemd manager; use --scheduler cron');
   }
-  for (const [file, text] of spec.files) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, text, { mode: 0o600 }); }
+  for (const [file, text] of spec.files) {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, spec.kind === 'windows' && file.endsWith('.xml') ? '\uFEFF' + text : text,
+      { mode: 0o600, encoding: spec.kind === 'windows' && file.endsWith('.xml') ? 'utf16le' : 'utf8' });
+  }
   if (spec.kind === 'windows') run('schtasks.exe', ['/Create', '/TN', spec.id, '/XML', path.join(home, 'task.xml'), '/F']);
   else if (spec.kind === 'launchd') {
     const domain = `gui/${os.userInfo().uid}`;
