@@ -37,10 +37,13 @@ const checks = [
   ['private key', /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/],
   ['service credential', /\b(?:sk-(?:proj-)?[A-Za-z0-9_-]{24,}|AKIA[A-Z0-9]{16})\b/],
 ];
+walk(path.join(root, 'scripts'));
 for (const file of files) {
   const text = fs.readFileSync(file, 'utf8');
   for (const [label, pattern] of checks) assert(!pattern.test(text), `${label} detected in ${path.relative(root, file)}`);
   if (file.endsWith('.mjs') || file.endsWith('.js')) run(['--check', file]);
 }
 run(['--test', 'skills/task-mode/scripts/state.test.mjs']);
-console.log(`Validated ${skills.length} skills and ${files.length} source files; syntax, publication scan and state tests passed.`);
+run(['--test', 'scripts/sync/sync.test.mjs']);
+run(['scripts/skills-sync.mjs', 'help']);
+console.log(`Validated ${skills.length} skills and ${files.length} source files; syntax, publication scan, state and sync integration tests passed.`);
