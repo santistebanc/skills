@@ -5,7 +5,6 @@ Personal, reusable skills for coding agents. Each folder under `skills/` contain
 | Skill | Purpose | Requirements |
 | --- | --- | --- |
 | [task-mode](skills/task-mode/) | Reconcile accumulated work, route parallel tasks, choose suitable checkouts and isolation, report progress, and integrate results. | T3 delegation tools, Git, Node.js; optional `airoute` CLI |
-| [airoute](skills/airoute/) | Choose an account, model and reasoning effort using live quota and task fit. | Separately installed `airoute` CLI and configured T3 accounts |
 | [questioning](skills/questioning/) | Run a visual decision interview, mirrored in chat, with durable answers. | Node.js 20+, a local browser, and an agent with shell access; app included |
 
 The T3 workflow skills depend on their host's tools. Installing instructions alone does not install their external CLIs, configure accounts, or add a native task mode. Task-mode continuity follows the agent's instructions and saved state; it does not install a per-prompt hook.
