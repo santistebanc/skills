@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Mode"
+  short_description: "Route parallel tasks through isolated worktrees"
+  default_prompt: "Use $task-mode to enable task mode in this thread and manage accumulated work through routed worktree subagents."

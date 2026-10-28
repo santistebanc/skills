@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Questioning</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --paper: #f6f4f0;
+  --ink: #1a1917;
+  --ink-soft: #6f6b64;
+  --line: rgba(26, 25, 23, 0.1);
+  --fill: rgba(26, 25, 23, 0.045);
+  --brief: #3d5a73;
+  --accent: #b44a1f;
+  --accent-fill: rgba(180, 74, 31, 0.1);
+  --settled: #2f6b45;
+  --danger: #a33b32;
+  --danger-fill: rgba(163, 59, 50, 0.1);
+  --on-accent: #fffaf6;
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --col: 720px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141311; --ink: #f2efe9; --ink-soft: #a8a39a;
+    --line: rgba(242, 239, 233, 0.1); --fill: rgba(242, 239, 233, 0.05);
+    --brief: #9bb4c9;
+    --accent: #e8925c; --accent-fill: rgba(232, 146, 92, 0.14);
+    --settled: #7dba90;
+    --danger: #e07a72; --danger-fill: rgba(224, 122, 114, 0.12);
+    --on-accent: #1c120c;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font); color: var(--ink); background: var(--paper); line-height: 1.55; }
+button, textarea, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: 0.65; }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  max-width: min(var(--col), 100%); margin: 0 auto; padding: 20px 20px 8px;
+  position: sticky; top: 0; z-index: 10; background: var(--paper);
+}
+.brand { font-size: 14px; letter-spacing: 0.04em; font-weight: 560; color: var(--accent); }
+.meta { display: flex; align-items: center; gap: 12px; }
+.session-bar { max-width: min(var(--col), 100%); margin: 0 auto; padding: 0 20px 6px; color: var(--ink-soft); font-size: 12px; overflow-wrap: anywhere; }
+.session-bar summary { cursor: pointer; }
+.session-bar code { font: 11px var(--mono); }
+.connection { color: var(--settled); }
+.connection.offline { color: var(--ink-soft); }
+.notice { padding: 12px 14px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; overflow-wrap: anywhere; }
+.muted { color: var(--ink-soft); font-size: 13px; }
+
+.list { max-width: min(var(--col), 100%); margin: 0 auto; padding: 0 20px 96px; }
+.rule { height: 1px; background: var(--line); margin: 18px 0; }
+.group { display: flex; flex-direction: column; gap: 6px; }
+
+.entry { border: 1px solid transparent; border-radius: 12px; transition: border-color 0.2s var(--ease), background 0.2s var(--ease); }
+.entry.open { border-color: var(--line); background: var(--fill); }
+.entry.next:not(.open) { background: var(--accent-fill); }
+.entry-head {
+  display: flex; align-items: baseline; gap: 10px; width: 100%;
+  background: none; border: 0; text-align: left; padding: 11px 14px; border-radius: 12px;
+}
+.num { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-soft); min-width: 22px; }
+.entry-title { font-weight: 560; font-size: 15px; }
+.entry-preview {
+  color: var(--ink-soft); font-size: 13px; margin-left: auto; max-width: 45%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; align-self: center; }
+.answered .dot { background: var(--settled); }
+.body { padding: 0 14px 16px 46px; }
+
+.prompt { font-size: 15px; }
+.question-heading { display: flex; align-items: flex-start; gap: 10px; }
+.question-heading > .prompt { flex: 1; min-width: 0; }
+.btn.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; flex: none; }
+.icon-btn svg { width: 18px; height: 18px; }
+.prompt p { margin: 0 0 10px; }
+.prompt h2, .prompt h3, .prompt h4, .prompt h5 { font-size: 15px; margin: 14px 0 6px; }
+.prompt ul, .prompt ol { margin: 0 0 10px; padding-left: 22px; }
+.prompt li { margin: 3px 0; }
+.prompt code { font-family: var(--mono); font-size: 0.88em; background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+.prompt pre { background: var(--fill); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+.prompt pre code { background: none; padding: 0; }
+.prompt a { color: var(--accent); }
+
+details.context { margin: 6px 0 12px; }
+details.context > summary { cursor: pointer; font-size: 13px; color: var(--ink-soft); list-style: none; }
+details.context > summary::before { content: "\25B8  "; }
+details.context[open] > summary::before { content: "\25BE  "; }
+details.context .prompt { margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--line); }
+
+.options { display: flex; flex-direction: column; gap: 7px; margin: 14px 0 12px; }
+.option {
+  display: flex; align-items: flex-start; gap: 10px; text-align: left;
+  border: 1px solid var(--line); background: transparent; border-radius: 10px;
+  padding: 11px 13px; font-size: 14px; transition: all 0.15s var(--ease);
+}
+.option:hover { background: var(--accent-fill); }
+.option.picked { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.badge {
+  margin-left: auto; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 20px; padding: 1px 8px; flex: none;
+}
+.option.picked .badge { color: var(--on-accent); border-color: var(--on-accent); }
+.option .label { flex: 1; }
+.option .label p:last-child { margin-bottom: 0; }
+.option-card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.option-card.selected { border-color: var(--accent); }
+.selection-mark { margin-right: 6px; }
+.option-row { display: flex; align-items: stretch; }
+.option-row .option { flex: 1; min-width: 0; border: 0; border-radius: 0; flex-wrap: wrap; }
+.option-row .label { flex-basis: 100%; overflow-wrap: anywhere; }
+.option-row .badge { margin-left: 0; }
+.disclosure { border: 0; background: transparent; color: var(--ink-soft); padding: 8px 12px; font-size: 12px; text-align: left; }
+.disclosure:hover { color: var(--accent); background: var(--accent-fill); }
+.option-row .disclosure { flex: 0 0 110px; border-left: 1px solid var(--line); }
+.disclosure::before { content: "\25B8  "; }
+.disclosure[aria-expanded="true"]::before { content: "\25BE  "; }
+.option-detail { border-top: 1px solid var(--line); padding: 12px 13px; font-size: 14px; }
+.option-detail p:last-child, .explanation p:last-child { margin-bottom: 0; }
+.question-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.question-tools:empty { display: none; }
+.explanation { margin: 0 0 14px; padding: 12px 14px; border-left: 2px solid var(--accent); background: var(--accent-fill); }
+.explanation-status { display: flex; align-items: center; gap: 8px; }
+.request-error { color: var(--danger); font-size: 13px; }
+@media (max-width: 480px) {
+  .body { padding-left: 14px; }
+  .option-row .disclosure { flex-basis: 96px; }
+}
+
+textarea {
+  width: 100%; min-height: 62px; resize: vertical; border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 13px; background: transparent; font-size: 14px;
+}
+textarea:focus { outline: none; border-color: var(--accent); }
+
+.actions { display: flex; gap: 8px; margin-top: 12px; }
+.actions.end { justify-content: flex-end; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); border-radius: 9px; padding: 8px 15px; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.sm { padding: 5px 11px; font-size: 13px; }
+
+.docmark { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+.docmark b { color: var(--settled); font-weight: 560; }
+
+
+.conclude { text-align: center; padding: 22px 0 0; }
+.conclude .actions { justify-content: center; }
+.done { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.done h1 { font-size: 20px; font-weight: 560; margin: 0; }
+.waiting { display: flex; align-items: center; gap: 10px; padding: 14px; color: var(--ink-soft); font-size: 14px; }
+.spinner { width: 13px; height: 13px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const root = document.getElementById("root");
+const UI_BUILD = document.querySelector('meta[name="questioning-build"]')?.content;
+let state = null;
+let openId = null;
+const expandedQuestions = new Set();
+let userTouched = false;
+let connected = false;
+let loadedSession = null;
+let actionError = "";
+const inFlight = new Map();
+const drafts = new Map();
+const disclosures = new Map();
+const requesting = new Set();
+const requestErrors = new Map();
+
+function rememberUI() {
+  if (!state) return;
+  try { localStorage.setItem("questioning:" + state.id, JSON.stringify({ drafts: [...drafts], disclosures: [...disclosures], openId, expandedQuestions: [...expandedQuestions] })); }
+  catch { /* private browsing and full storage must not prevent answering */ }
+}
+function restoreUI() {
+  if (loadedSession === state.id) return;
+  loadedSession = state.id;
+  try {
+    const saved = JSON.parse(localStorage.getItem("questioning:" + state.id) || "null");
+    if (!saved) return;
+    for (const [id, value] of saved.drafts || []) drafts.set(id, value);
+    for (const [id, value] of saved.disclosures || []) disclosures.set(id, value);
+    openId = saved.openId ?? null;
+    for (const id of saved.expandedQuestions || (openId ? [openId] : [])) expandedQuestions.add(id);
+    userTouched = drafts.size > 0;
+  } catch { /* ignore unavailable or invalid browser storage */ }
+}
+const finished = () => state && ["closed", "aborted"].includes(state.phase);
+
+const ENTITIES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ENTITIES[c]);
+
+function md(src) {
+  if (!src) return "";
+  const code = [];
+  let t = String(src).replace(/\r\n/g, "\n");
+  t = t.replace(/```[a-z]*\n?([\s\S]*?)```/g, (_, c) => {
+    code.push(c);
+    return "\u0000" + (code.length - 1) + "\u0000";
+  });
+  t = esc(t);
+  t = t.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  t = t.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+  t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+
+  const out = [];
+  let para = [];
+  let list = null;
+  const flushPara = () => {
+    if (para.length) { out.push("<p>" + para.join("<br>") + "</p>"); para = []; }
+  };
+  const flushList = () => {
+    if (list) {
+      out.push("<" + list.tag + ">" + list.items.map((i) => "<li>" + i + "</li>").join("") + "</" + list.tag + ">");
+      list = null;
+    }
+  };
+  for (const raw of t.split("\n")) {
+    const line = raw.trimEnd();
+    if (!line.trim()) { flushPara(); flushList(); continue; }
+    const h = line.match(/^(#{1,4})\s+(.*)$/);
+    if (h) {
+      flushPara(); flushList();
+      const lvl = h[1].length + 1;
+      out.push("<h" + lvl + ">" + h[2] + "</h" + lvl + ">");
+      continue;
+    }
+    const ul = line.match(/^\s*[-*]\s+(.+)$/);
+    const ol = line.match(/^\s*\d+\.\s+(.+)$/);
+    if (ul || ol) {
+      flushPara();
+      const tag = ul ? "ul" : "ol";
+      if (!list || list.tag !== tag) { flushList(); list = { tag, items: [] }; }
+      list.items.push((ul || ol)[1]);
+      continue;
+    }
+    flushList();
+    para.push(line);
+  }
+  flushPara();
+  flushList();
+  return out.join("").replace(/\u0000(\d+)\u0000/g, (_, i) => "<pre><code>" + esc(code[Number(i)]) + "</code></pre>");
+}
+
+const inline = (s) => md(s).replace(/^<p>/, "").replace(/<\/p>$/, "");
+
+async function post(path, body) {
+  const payload = JSON.stringify(body || {});
+  const key = path + payload;
+  // Preserve an operation ID across retries, including after the server restarts.
+  if (!inFlight.has(key)) inFlight.set(key, crypto.randomUUID());
+  try {
+    const res = await fetch(path, {
+      method: "POST", headers: { "content-type": "application/json", "idempotency-key": inFlight.get(key) },
+      body: payload, signal: AbortSignal.timeout(15000),
+    });
+    const result = await res.json();
+    if (!res.ok) { inFlight.delete(key); throw new Error(result.error || "Could not save this action."); }
+    inFlight.delete(key); actionError = "";
+    return result;
+  } catch (error) {
+    actionError = connected ? error.message : "App disconnected. Your draft is saved in this browser; resume this session in chat, then retry.";
+    render();
+    return null;
+  }
+}
+
+async function submit(id, optionId, text, accepted) {
+  const value = String(text || "").trim();
+  if (!value) return;
+  const result = await post("/api/answer", { questionId: id, optionId, text: value, acceptedRecommendation: !!accepted });
+  if (!result) return;
+  userTouched = false; drafts.delete(id);
+  // The saved answer may arrive over the stream before or after this response.
+  // Leave an already-open next question alone; the stream advances once saved.
+  if (state.nodes.find((n) => n.id === id)?.answer) advanceToNextQuestion();
+  rememberUI();
+  render();
+}
+
+function advanceToNextQuestion() {
+  const unanswered = state.nodes.filter((n) => !n.answer && n.status !== "blocked");
+  if (openId) expandedQuestions.add(openId);
+  const nextId = unanswered[0]?.id ?? null;
+  if (nextId) expandedQuestions.add(nextId);
+  if (!unanswered.some((n) => n.id === openId)) openId = nextId;
+  userTouched = false;
+  rememberUI();
+}
+
+function disclosure(key, panel, label, initiallyOpen = false) {
+  const b = document.createElement("button");
+  b.className = "disclosure";
+  b.id = panel.id + "-toggle";
+  b.type = "button";
+  b.textContent = label;
+  b.setAttribute("aria-label", label);
+  b.setAttribute("aria-controls", panel.id);
+  const update = (open) => {
+    panel.hidden = !open;
+    b.setAttribute("aria-expanded", String(open));
+  };
+  update(disclosures.get(key) ?? initiallyOpen);
+  b.onclick = () => {
+    const open = panel.hidden;
+    disclosures.set(key, open);
+    rememberUI();
+    update(open);
+  };
+  return b;
+}
+
+function questionIntro(n, wrap) {
+  const prompt = document.createElement("div");
+  prompt.className = "prompt";
+  prompt.innerHTML = md(n.prompt);
+  const heading = document.createElement("div");
+  heading.className = "question-heading";
+  heading.appendChild(prompt);
+  wrap.appendChild(heading);
+  const tools = document.createElement("div");
+  tools.className = "question-tools";
+  const ask = document.createElement("button");
+  ask.className = "btn ghost icon-btn";
+  ask.id = "explain-" + n.num;
+  const busy = Boolean(n.elaborationRequest) || requesting.has(n.id);
+  const askLabel = busy ? "Explanation requested" : (n.explanation?.text ? "Explain further" : "Explain question");
+  ask.setAttribute("aria-label", askLabel);
+  ask.title = askLabel;
+  ask.innerHTML = busy ? '<span class="spinner" aria-hidden="true"></span>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.4 2.4 0 0 1 4.8 0c0 1.6-2.4 1.8-2.4 3.5"/><path d="M12 16h.01"/></svg>';
+  ask.disabled = busy;
+  ask.onclick = async () => {
+    requesting.add(n.id);
+    requestErrors.delete(n.id);
+    render();
+    try {
+      const result = await post("/api/elaborate", { questionId: n.id });
+      if (!result) throw new Error("request failed");
+    } catch {
+      requestErrors.set(n.id, "Could not request an explanation. Try again.");
+    } finally {
+      requesting.delete(n.id);
+      render();
+    }
+  };
+  if (!finished()) heading.appendChild(ask);
+  let panel;
+  if (n.explanation?.text) {
+    panel = document.createElement("div");
+    panel.id = "explanation-" + n.num;
+    panel.className = "prompt explanation";
+    panel.innerHTML = md(n.explanation.text);
+    tools.appendChild(disclosure(n.id + ":explanation:" + n.explanation.requestId, panel, "Question explanation", true));
+  }
+  wrap.appendChild(tools);
+  if (busy) {
+    const status = document.createElement("div");
+    status.className = "muted explanation-status";
+    status.setAttribute("role", "status");
+    status.innerHTML = state.agent?.status === "disconnected"
+      ? '<span>Explanation request saved. Reconnect the AI from chat to get a response; you can keep answering.</span>'
+      : '<span class="spinner" aria-hidden="true"></span><span>Asked the AI for a fuller explanation. You can keep answering.</span>';
+    tools.appendChild(status);
+  }
+  if (requestErrors.has(n.id)) {
+    const error = document.createElement("div");
+    error.className = "request-error";
+    error.setAttribute("role", "alert");
+    error.textContent = requestErrors.get(n.id);
+    tools.appendChild(error);
+  }
+  if (panel) wrap.appendChild(panel);
+  if (n.context) {
+    const d = document.createElement("details");
+    d.className = "context";
+    d.innerHTML = '<summary>Context</summary><div class="prompt">' + md(n.context) + '</div>';
+    d.open = disclosures.get(n.id + ":context") ?? false;
+    d.ontoggle = () => { disclosures.set(n.id + ":context", d.open); rememberUI(); };
+    wrap.appendChild(d);
+  }
+}
+
+function optionCard(n, o, index, recommended, explanation, choose, readOnly = false) {
+  const selected = n.answer?.optionId === o.id;
+  const card = document.createElement("div");
+  card.className = "option-card" + (recommended ? " rec" : "") + (selected ? " selected" : "");
+  const row = document.createElement("div");
+  row.className = "option-row";
+  const b = document.createElement(readOnly ? "div" : "button");
+  b.className = "option" + (selected ? " picked" : "");
+  b.innerHTML = '<span class="label">' + (selected ? '<span class="selection-mark" aria-hidden="true">&#10003;</span>' : '') + inline(o.label) + '</span>' +
+    (recommended ? '<span class="badge">recommended</span>' : "");
+  if (!readOnly) {
+    b.setAttribute("aria-pressed", String(selected));
+    b.onclick = choose;
+  }
+  row.appendChild(b);
+  card.appendChild(row);
+  if (explanation) {
+    const panel = document.createElement("div");
+    panel.id = "option-detail-" + n.num + "-" + index;
+    panel.className = "prompt option-detail";
+    panel.innerHTML = md(explanation);
+    const toggle = disclosure(n.id + ":option:" + o.id, panel, "Why choose this?");
+    toggle.setAttribute("aria-label", "Why choose option " + (index + 1) + "? " + o.label);
+    row.appendChild(toggle);
+    card.appendChild(panel);
+  }
+  return card;
+}
+
+function optionList(n, readOnly = false) {
+  const box = document.createElement("div");
+  box.className = "options";
+  const rec = n.recommendation || {};
+  (n.options || []).filter((o) => o && o.label).forEach((o, i) => {
+    const recommended = rec.optionId === o.id;
+    const explanation = o.explanation || (recommended ? rec.text : "");
+    box.appendChild(optionCard(n, o, i, recommended, explanation,
+      () => submit(n.id, o.id, o.label, recommended), readOnly));
+  });
+  return box;
+}
+
+function bodyFor(n) {
+  const wrap = document.createElement("div");
+  wrap.className = "body";
+
+  questionIntro(n, wrap);
+
+  const field = document.createElement("textarea");
+  field.id = "answer-" + n.num;
+  field.setAttribute("aria-label", "Your answer to Q" + n.num);
+  field.readOnly = finished();
+  field.placeholder = "Or write your own — Enter to send";
+  field.onkeydown = (e) => {
+    if (!finished() && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(n.id, null, field.value, false); }
+  };
+  field.oninput = () => { userTouched = true; drafts.set(n.id, field.value); rememberUI(); };
+
+  const rec = n.recommendation || {};
+  const opts = (n.options || []).filter((o) => o && o.label);
+
+  if (opts.length) {
+    wrap.appendChild(optionList(n, finished()));
+  } else if (rec.text) {
+    const box = document.createElement("div");
+    box.className = "options";
+    const b = document.createElement("button");
+    const selected = Boolean(n.answer?.acceptedRecommendation && n.answer.text === rec.text);
+    b.className = "option rec" + (selected ? " picked" : "");
+    b.setAttribute("aria-pressed", String(selected));
+    b.disabled = finished();
+    b.innerHTML = '<span class="label">' + (selected ? '<span class="selection-mark" aria-hidden="true">&#10003;</span>' : '') + inline(rec.text) + '</span><span class="badge">suggested</span>';
+    b.onclick = () => submit(n.id, null, rec.text, true);
+    box.appendChild(b);
+    wrap.appendChild(box);
+
+    const row = document.createElement("div");
+    row.className = "actions";
+    const edit = document.createElement("button");
+    edit.className = "btn ghost sm";
+    edit.textContent = "Edit this";
+    edit.onclick = () => {
+      field.value = rec.text;
+      drafts.set(n.id, field.value);
+      rememberUI();
+      userTouched = true;
+      field.focus();
+      field.selectionStart = field.selectionEnd = field.value.length;
+    };
+    row.appendChild(edit);
+    if (!finished()) wrap.appendChild(row);
+  }
+
+  wrap.appendChild(field);
+  field.value = drafts.get(n.id) ?? n.answer?.text ?? "";
+  if (n.docs?.length) {
+    const docs = document.createElement("div");
+    docs.className = "docmark";
+    docs.innerHTML = 'Staged: <b>' + n.docs.map(esc).join('</b>, <b>') + '</b>';
+    wrap.appendChild(docs);
+  }
+  return wrap;
+}
+
+function entry(n, isNext) {
+  const art = document.createElement("article");
+  const isOpen = expandedQuestions.has(n.id);
+  art.className =
+    "entry" + (n.answer ? " answered" : "") + (isOpen ? " open" : "") + (!n.answer && isNext ? " next" : "");
+  const head = document.createElement("button");
+  head.className = "entry-head";
+  head.innerHTML =
+    '<span class="dot"></span><span class="num">Q' + n.num + "</span>" +
+    '<span class="entry-title">' + esc(n.title) + "</span>" +
+    (n.answer && !isOpen ? '<span class="entry-preview">' + esc(n.answer.text) + "</span>" : "");
+  head.onclick = () => {
+    if (isOpen) { expandedQuestions.delete(n.id); if (openId === n.id) openId = null; }
+    else { expandedQuestions.add(n.id); openId = n.id; }
+    userTouched = isOpen;
+    rememberUI();
+    render();
+  };
+  art.appendChild(head);
+  if (isOpen) art.appendChild(bodyFor(n));
+  return art;
+}
+
+function briefCard() {
+  const art = document.createElement("article");
+  const isOpen = !finished() && (expandedQuestions.has("__brief__") || !state.brief);
+  art.className = "entry" + (isOpen ? " open" : "");
+  const head = document.createElement("button");
+  head.className = "entry-head";
+  head.innerHTML =
+    '<span class="dot" style="background:var(--brief)"></span><span class="num"></span>' +
+    '<span class="entry-title">Brief</span>' +
+    (!isOpen && state.brief ? '<span class="entry-preview">' + esc(state.brief) + "</span>" : "");
+  head.onclick = () => {
+    if (finished()) return;
+    if (isOpen) { expandedQuestions.delete("__brief__"); if (openId === "__brief__") openId = null; }
+    else { expandedQuestions.add("__brief__"); openId = "__brief__"; }
+    userTouched = isOpen;
+    rememberUI(); render();
+  };
+  art.appendChild(head);
+  if (!isOpen) return art;
+
+  const wrap = document.createElement("div");
+  wrap.className = "body";
+  const ta = document.createElement("textarea");
+  ta.id = "brief-draft";
+  ta.value = drafts.get("__brief__") ?? state.brief ?? "";
+  ta.oninput = () => { drafts.set("__brief__", ta.value); rememberUI(); };
+  ta.placeholder = "What are we working through?";
+  ta.style.minHeight = "90px";
+  const row = document.createElement("div");
+  row.className = "actions end";
+  const save = document.createElement("button");
+  save.className = "btn sm";
+  save.textContent = state.brief ? "Update" : "Start";
+  save.onclick = async () => {
+    if (await post("/api/brief", { text: ta.value })) { openId = null; expandedQuestions.delete("__brief__"); drafts.delete("__brief__"); rememberUI(); render(); }
+  };
+  row.appendChild(save);
+  wrap.appendChild(ta);
+  wrap.appendChild(row);
+  art.appendChild(wrap);
+  return art;
+}
+
+const rule = () => Object.assign(document.createElement("div"), { className: "rule" });
+
+function render() {
+  const focused = document.activeElement;
+  const focusId = focused?.id;
+  const selection = focused?.tagName === "TEXTAREA" ? [focused.selectionStart, focused.selectionEnd] : null;
+  if (!state) {
+    root.innerHTML = '<div class="done"><div class="spinner"></div><p class="muted">Connecting</p></div>';
+    return;
+  }
+
+  const answered = state.nodes
+    .filter((n) => n.answer)
+    .sort((a, b) => a.answer.answeredAt - b.answer.answeredAt);
+  const open = finished() ? [] : state.nodes.filter((n) => !n.answer && n.status !== "blocked");
+  if (openId === null && !userTouched) {
+    openId = state.brief ? (open.length ? open[0].id : null) : "__brief__";
+  }
+  if (openId) expandedQuestions.add(openId);
+
+  root.innerHTML = "";
+  const bar = document.createElement("header");
+  bar.className = "topbar";
+  bar.innerHTML =
+    '<div class="brand">Questioning</div><div class="meta">' +
+    '<span class="muted">' + answered.length + " settled · " + open.length + " open</span>" +
+    (finished() ? "" : '<button class="btn ghost sm" data-end="1">End</button>') + '</div>';
+  if (!finished()) bar.querySelector("[data-end]").onclick = () => {
+    if (confirm("End this session without confirming?")) post("/api/abort");
+  };
+  root.appendChild(bar);
+  const sessionBar = document.createElement("div");
+  sessionBar.className = "session-bar";
+  const agentStatus = state.agent?.status;
+  const label = !connected ? "App disconnected" : finished() ? "Session saved" : agentStatus === "listening" ? "App connected · AI listening" : agentStatus === "active" ? "App connected · AI recently active" : "App connected · AI not connected";
+  sessionBar.innerHTML = '<details><summary class="connection' + (!connected || agentStatus === "disconnected" ? ' offline' : '') + '">' + esc(label) + '</summary><div>Session <code>' + esc(state.id) + '</code><br>Resume from chat with <code>questioning resume ' + esc(state.id) + '</code></div></details>';
+  const sessionDetails = sessionBar.querySelector("details");
+  sessionDetails.open = disclosures.get("__session__") ?? false;
+  sessionDetails.ontoggle = () => { disclosures.set("__session__", sessionDetails.open); rememberUI(); };
+  root.appendChild(sessionBar);
+
+  const list = document.createElement("main");
+  list.className = "list";
+  if (actionError || !connected || finished()) {
+    const notice = document.createElement("div");
+    notice.className = "notice";
+    notice.setAttribute("role", actionError ? "alert" : "status");
+    notice.textContent = actionError || (finished() ? (state.phase === "aborted" ? "Ended early. Your answers are saved." : "Interview finished. Your answers are saved.") : "The app is disconnected. Your draft is saved in this browser. Resume this session in chat to reconnect.");
+    list.appendChild(notice);
+  }
+  list.appendChild(briefCard());
+
+  if (answered.length) {
+    list.appendChild(rule());
+    const g = document.createElement("section");
+    g.className = "group";
+    answered.forEach((n) => g.appendChild(entry(n, false)));
+    list.appendChild(g);
+  }
+  if (open.length) {
+    list.appendChild(rule());
+    const g = document.createElement("section");
+    g.className = "group";
+    open.forEach((n, i) => g.appendChild(entry(n, i === 0)));
+    list.appendChild(g);
+  }
+  if (!open.length && state.phase === "active" && state.brief) {
+    const w = document.createElement("div");
+    w.className = "waiting";
+    w.setAttribute("role", "status");
+    w.textContent = state.agent?.status === "disconnected" ? "No open questions. Reconnect the AI from chat to continue." : "No open questions. The AI needs to publish the next question or offer Finish.";
+    list.appendChild(w);
+  }
+  if (state.phase === "ready") {
+    list.appendChild(rule());
+    const c = document.createElement("div");
+    c.className = "conclude";
+    c.innerHTML =
+      '<p class="muted">Nothing left to ask.</p><div class="actions">' +
+      '<button class="btn" data-fin="1">Finish</button>' +
+      '<button class="btn ghost" data-keep="1">Keep going</button></div>';
+    c.querySelector("[data-fin]").onclick = () => post("/api/confirm");
+    c.querySelector("[data-keep]").onclick = () => post("/api/keep");
+    list.appendChild(c);
+  }
+  root.appendChild(list);
+  if (focusId) {
+    const replacement = document.getElementById(focusId);
+    if (replacement && !replacement.disabled) {
+      replacement.focus({ preventScroll: true });
+      if (selection) replacement.setSelectionRange(...selection);
+    }
+  }
+}
+
+function connect() {
+  const es = new EventSource("/api/stream");
+  es.onmessage = (e) => {
+    const next = JSON.parse(e.data);
+    if (UI_BUILD && next.build && UI_BUILD !== next.build) {
+      rememberUI();
+      location.reload();
+      return;
+    }
+    const previous = state;
+    state = next;
+    connected = true;
+    restoreUI();
+    if (previous && state.nodes.some((n) => n.answer &&
+      n.answer.answeredAt !== previous.nodes.find((old) => old.id === n.id)?.answer?.answeredAt)) {
+      advanceToNextQuestion();
+    }
+    render();
+  };
+  es.onerror = () => {
+    es.close();
+    connected = false;
+    render();
+    setTimeout(connect, 1200);
+  };
+}
+
+render();
+connect();
+</script>
+</body>
+</html>

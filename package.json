@@ -1,0 +1,7 @@
+{
+  "name": "santistebanc-skills",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node scripts/validate.mjs" }
+}

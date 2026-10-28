@@ -1,0 +1,11 @@
+{
+  "name": "questioning-local",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "bin": { "questioning": "scripts/q.mjs" },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "check": "node --check scripts/q.mjs && node --check scripts/serve.mjs"
+  }
+}
