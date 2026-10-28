@@ -5,7 +5,6 @@ Personal, reusable skills for coding agents. Each folder under `skills/` contain
 | Skill | Purpose | Requirements |
 | --- | --- | --- |
 | [task-mode](skills/task-mode/) | Reconcile accumulated work, route parallel tasks, choose suitable checkouts and isolation, report progress, and integrate results. | T3 delegation tools, Git, Node.js; optional `airoute` CLI |
-| [questioning](skills/questioning/) | Run a visual decision interview, mirrored in chat, with durable answers. | Node.js 20+, a local browser, and an agent with shell access; app included |
 
 The T3 workflow skills depend on their host's tools. Installing instructions alone does not install their external CLIs, configure accounts, or add a native task mode. Task-mode continuity follows the agent's instructions and saved state; it does not install a per-prompt hook.
 
@@ -20,8 +19,6 @@ Copy-Item -Recurse ./skills/skills/task-mode "$HOME/.codex/skills/task-mode"
 
 For Claude Code, use `~/.claude/skills/` instead. Review and back up an existing installation before replacing it. Copy the entire folder, including `scripts/`, `references/` and `agents/` when present. Invoke using your host's skill syntax, such as `$task-mode` in Codex.
 
-The Questioning skill includes its local app: `node skills/questioning/scripts/q.mjs help` lists commands. It keeps interview data in a user-local store outside this repository.
-
 ## Maintain
 
 Keep custom skills in `skills/<name>/`. This repository contains reviewed public copies; existing local installations are not automatically replaced or synchronized. When changing an installed skill, bring its reusable changes here, review the diff, validate, then commit and push. Do not copy entire agent configuration directories.
@@ -30,7 +27,7 @@ Keep custom skills in `skills/<name>/`. This repository contains reviewed public
 npm test
 ```
 
-Validation checks skill entry points, JavaScript syntax, likely credentials and machine-specific paths, CLI entry points, and task-mode state recovery tests. GitHub Actions runs the same checks on Windows and Linux.
+Validation checks skill entry points, JavaScript syntax, likely credentials and machine-specific paths, and task-mode state recovery tests. GitHub Actions runs the same checks on Windows and Linux.
 
 Publish instructions, source code and synthetic examples only. Private career records, interview sessions, task ledgers, usage/account caches and credentials belong outside Git. Downloaded third-party skills and bundled provider skills are excluded; install those from their original authors.
 

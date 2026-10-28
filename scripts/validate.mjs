@@ -43,5 +43,4 @@ for (const file of files) {
   if (file.endsWith('.mjs') || file.endsWith('.js')) run(['--check', file]);
 }
 run(['--test', 'skills/task-mode/scripts/state.test.mjs']);
-run(['skills/questioning/scripts/q.mjs', 'help']);
-console.log(`Validated ${skills.length} skills and ${files.length} source files; syntax, CLI entry points, publication scan and state tests passed.`);
+console.log(`Validated ${skills.length} skills and ${files.length} source files; syntax, publication scan and state tests passed.`);
