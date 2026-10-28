@@ -1,6 +1,6 @@
 ---
 name: task-mode
-description: Enable, resume, inspect, or disable task mode in a T3 thread. While active, reconcile accumulated work after each user prompt, route independent tasks to quota-aware subagents, and choose suitable checkouts and worktree isolation for the job.
+description: Enable, resume, inspect, or disable task mode in a T3 thread. Reconcile accumulated work, route independent tasks, choose workspaces, and proactively check quota for coordinator and subagent handoffs before account exhaustion.
 ---
 
 # Task mode
@@ -14,7 +14,7 @@ Choose the invocation first: enable/resume follows activation below; status read
 1. Discover the available T3 tools. Call `orchestrator_capabilities` once before the first `delegate_task` in this thread; refresh only after an error or a user-named provider change. It supplies the current thread ID as `parentThreadId`. If already known, reuse it. Read a thread with `t3_thread_read` before reasoning about its state.
 2. Use `node <skill-dir>/scripts/state.mjs init THREAD_ID`, then `read THREAD_ID`. State lives in `~/.t3/task-mode/THREAD_ID.json`, outside the repository. Only the parent writes it. `init` preserves existing state, including an inactive mode; enable an inactive state explicitly with `save` after a new activation request.
 3. Discover the actual repository, current checkout path, symbolic branch and HEAD from Git and T3. For a fresh ledger, use the thread's branch as the default integration target, even if it is not `main`. Choose working checkouts separately using the workspace guidance below. Recovery preserves the saved integration target; reconcile unexpected changes against Git/T3 evidence, asking only when the intended destination is ambiguous. Non-Git or detached workspaces can still support suitable direct work; establish a valid destination before branch integration rather than initializing Git implicitly.
-4. On activation, save `enabled: true`, `paused: false`, the established target, accumulated intent, and existing work. Ordinary recovery preserves mode flags. Announce activation and the target branch. Keep this recovery pointer in the conversation's plan and compaction summary: `Task mode active; read $task-mode and ~/.t3/task-mode/THREAD_ID.json before planning work.` Do not modify project or global instruction files to activate a single thread.
+4. On activation, save `enabled: true`, `paused: false`, the established target, accumulated intent, and existing work. Ordinary recovery preserves mode flags. Enable checkpoint-based quota handoff unless the user opts out; enabling task mode authorizes automatic switches among eligible configured accounts within the user's provider/model restrictions. Announce the target branch and this handoff policy. Keep this recovery pointer in the conversation's plan and compaction summary: `Task mode active; read $task-mode and ~/.t3/task-mode/THREAD_ID.json before planning work.` Do not modify project or global instruction files to activate a single thread.
 
 Use `save THREAD_ID` with the complete updated JSON on stdin; the revision must match the last read. Reread and reconcile on a stale revision. The helper validates and atomically replaces state. Never store credentials or full tool logs in it.
 
@@ -25,6 +25,8 @@ Each task uses a stable `key`, `state`, outcome, acceptance checks, owned files,
 ## On each prompt or delegate event
 
 Read state first. If disabled or paused, handle user requests normally without task-mode dispatch/integration; late child events may update observations only. Explicit status questions should receive a brief answer; do not reinterpret them as new implementation work.
+
+Before substantive work, dispatch, integration, or a potentially expensive operation, apply [quota checks and handoff](references/quota-handoff.md). Recheck at natural work checkpoints (at least every two minutes of active tool-driven work). This checks provider usage without polling delegated task status. Resolve a pending coordinator handoff before creating more work. A quota check is agent-followed; it is not a background monitor and cannot run while the agent is already blocked.
 
 - **Reconcile intent:** fold new work and changed constraints into all unfinished work, not just the latest message. Keep completed work recorded. Deduplicate against queued, running, ready and integrated tasks. A user correction supersedes stale requirements. Cancel obsolete delegates with `task_cancel` before replacing them; a request for fewer or no delegates means cancel extras without replacements. Preserve their work until disposition is clear.
 - **Find parallel seams:** give each task a concrete outcome, acceptance checks, file/module ownership, and dependencies. Dispatch independent tasks when parallelism saves more time than coordination costs. Serialize shared-file changes, schema/interface prerequisites and dependent work. A small or inseparable request can run directly in the parent; record that decision rather than inventing parallelism. Parent implementation must avoid files owned by active children.
@@ -38,7 +40,7 @@ When `.factory.json` exists, apply the current software-factory skill specified 
 
 Read the installed `airoute` skill. Run `airoute recommend --json --title TITLE --body-file BRIEF_FILE` separately for each ready task; recommendations reserve estimated quota, so take them sequentially. Keep each recommendation ID, target and short rationale. Match task difficulty, required context and risk; do not hardcode a model or account ranking.
 
-Validate the recommended provider, model and options against live capabilities. Use `search` when a model was omitted from the short list. Pass the returned `target` unchanged, including effort in `target.options`. If routing fails or is not installed, use the configured inherited delegate target and disclose the fallback. If a selected/requested provider or model is unavailable, report that and leave the task queued; do not silently substitute a provider or native agent. The parent thread's model stays unchanged.
+Validate the recommended provider, model and options against live capabilities. Use `search` when a model was omitted from the short list. Pass the returned `target` unchanged, including effort in `target.options`. If routing fails or is not installed, use the configured inherited delegate target and disclose the fallback for ordinary dispatch; quota handoff requires fresh evidence of alternate account capacity. If a selected/requested provider or model is unavailable, report that and leave the task queued; do not silently substitute a provider or native agent. Change the parent's selection only through the authorized quota-handoff procedure, not merely because a different model scores better.
 
 ### Choose the workspace
 

@@ -15,6 +15,7 @@ Required base commit SHA (if relevant): ...
 Integration destination: ...
 Commit ownership (parent or child; serialize shared-checkout Git operations): ...
 Worktree created/owned by this task and cleanup disposition: ...
+Actual assigned provider instance ID and applicable quota policy: ...
 
 Outcome and acceptance checks: ...
 Relevant user constraints and repository instructions: ...
@@ -33,6 +34,15 @@ another child's files. Follow repository instructions, including software-factor
 when applicable. If assigned commit ownership, commit only task changes;
 otherwise leave a scoped diff for the parent. A shared checkout may contain
 unrelated changes; do not clean them. Parent handles integration and cleanup.
+
+Apply the quota-check procedure supplied from references/quota-handoff.md at
+work boundaries and before expensive operations. Use provider quota percentages
+(default reserves: 20% session, 10% weekly), not context-window token usage.
+On low capacity, checkpoint actual files/HEAD, completed and remaining work,
+checks, and live operations; send one quota-handoff notice to the parent and
+end your turn with the checkpoint. Keep uncommitted work intact. This is
+unfinished work even if your turn completes. Parent handles account selection
+and continuation; do not self-switch or create another agent.
 
 This skill authorizes task-status messages solely to the parent thread above.
 At meaningful transitions send t3_thread_send(threadId=PARENT, mode="auto",

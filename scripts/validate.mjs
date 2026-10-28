@@ -44,6 +44,7 @@ for (const file of files) {
   if (file.endsWith('.mjs') || file.endsWith('.js')) run(['--check', file]);
 }
 run(['--test', 'skills/task-mode/scripts/state.test.mjs']);
+run(['--test', 'skills/task-mode/scripts/quota.test.mjs']);
 run(['--test', 'scripts/sync/sync.test.mjs']);
 run(['scripts/skills-sync.mjs', 'help']);
 console.log(`Validated ${skills.length} skills and ${files.length} source files; syntax, publication scan, state and sync integration tests passed.`);
