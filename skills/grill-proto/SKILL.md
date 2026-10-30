@@ -1,6 +1,6 @@
 ---
 name: grill-proto
-description: Interview the user about an idea, plan, or design, using competing working prototypes to clarify decisions. Use for prototype-assisted grilling about UI, APIs, workflows, or other prototype-friendly decisions.
+description: Interview the user about an idea, plan, or design, using inline rich HTML and competing working prototypes to clarify decisions. Use for visual or prototype-assisted grilling about UI, APIs, workflows, or other prototype-friendly decisions.
 ---
 
 # Grill proto
@@ -13,9 +13,19 @@ Establish the goal and scope; ask if unclear. Focus on decisions needed for that
 
 The **frontier** contains open decisions whose prerequisites are settled. Cover it each round, in manageable batches if needed. Ask ready questions while other research or prototypes are pending. Questions depending on unanswered questions belong in later rounds.
 
-For each question, name the uncertainty and what trying alternatives would reveal beyond a direct answer. Build prototypes automatically when that benefit is clear; otherwise ask directly. Prepare one question's prototype set at a time by default.
+For each question, name the uncertainty. Build working prototypes automatically when trying alternatives would reveal more than text or an inline illustration; otherwise ask directly, with rich HTML when useful. Prepare one question's prototype set at a time by default.
 
 After each round, update the tree and recompute the frontier. Revisit answers contradicted by new evidence. Clarify incomplete or ambiguous replies, including a bare "yes" to several questions, without reopening clear answers.
+
+## Illustrate questions with rich HTML
+
+Before posing any question, check whether inline rich HTML could make the question or its options easier to understand. Render it automatically when useful and supported; use text when it adds little. This applies to direct questions and prototype questions alike.
+
+Use the smallest helpful visual: UI mockups or before/after views, a relationship diagram, or a comparison of options. For UI changes, show what the proposed changes would look like in the product's context. Keep alternatives comparable and label them with the question and option IDs. Mark inferred details and simulated behavior.
+
+Present the visual with the question's context where the host supports it; otherwise match it clearly by question ID. Keep the numbered question, tradeoffs, and recommendation readable in chat. Use the host's inline HTML tools to check and render it; a code block or file link alone does not show the visual. If rendering is unavailable, say so and continue in text.
+
+An inline mockup can answer a visual question without a separate prototype. Build working variants when the decision needs behavior the illustration cannot demonstrate. Inline previews supplement, rather than replace, each prototype's direct link.
 
 ## Find facts yourself
 
@@ -36,11 +46,15 @@ Use this format:
 ```text
 ❓ **Q1** - **<question title>**: <question body, with context or choices as needed>
 
+<Inline rich HTML illustration, when useful.>
+
 ➡️ <your recommended answer and a short reason>
 
 ---
 
 ❓ **Q2** - **<question title>**: <question body, with context or choices as needed>
+
+<Inline rich HTML illustration, when useful.>
 
 ➡️ <your recommended answer and a short reason>
 ```
@@ -71,6 +85,8 @@ Use this format:
 ❓ **Q3** - **<question title>**: <the decision these prototypes help answer>
 
 <Brief context: why this matters and what differs between the prototypes.>
+
+<Inline rich HTML preview or comparison, when useful.>
 
 🧪 **Try the prototypes**: <picker link or runnable entry point>
 
