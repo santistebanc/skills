@@ -64,11 +64,15 @@ Check descriptions of current behavior against relevant code. Surface contradict
 
 Build the smallest working comparison: two or three distinct, credible alternatives with honest benefits and costs. Use interactive UI, executable API examples, workflow simulations, or another suitable form.
 
-Use one subagent per variant, in parallel within capacity; build sequentially if unavailable. Give each the question, direction, settled constraints, shared data, expected interface, and separate owned files. The parent owns the comparison harness.
+When an app exists, build variants on top of it in separate worktrees when that is easier. Reuse its components, styles, dependencies, and flows; implement only what the question needs. A prototype can be a small change to the app, not a standalone full application. Use standalone examples when simpler or when no app exists.
+
+Use one subagent per variant, in parallel within capacity; build sequentially if unavailable. Give each the question, direction, settled constraints, shared data, expected interface, and its worktree or separate owned files. Use the host's supported worktree delegation; do not assume a shell-created checkout binds a subagent. The parent owns any shared comparison harness.
+
+Start variants from the same agreed app state. Include relevant uncommitted changes only through a supported, deliberate transfer; a new worktree does not inherit them. Give concurrently running variants separate ports and isolated mutable data where needed.
 
 Keep prototypes separate from production behavior. Simulate external effects and label all simulated behavior. Run each variant's relevant behavior before presenting it; disclose checks you could not perform.
 
-Give every variant a stable ID and verified direct link inside the question. Picker links must open the named variant; API and workflow links must reach its runnable example. Show UI at realistic size and use the same scenario across variants.
+Give every variant a stable ID and verified direct link inside the question, including variants running from worktrees. Picker links must open the named variant; API and workflow links must reach its runnable example. Show UI at realistic size and use the same scenario across variants. Keep the required runtime available while the user evaluates it; a worktree path alone is not a runnable preview.
 
 Label revisions, such as `Q2-B v2`. Preserve evaluated versions and their links; record which version each answer concerns.
 
