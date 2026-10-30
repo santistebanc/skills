@@ -26,6 +26,8 @@ These forms can combine: an app-variant question may include an inline compariso
 
 ## Present the whole question in rich HTML
 
+Read [references/question-template.md](references/question-template.md) and reuse [assets/question.html](assets/question.html) for every question. Keep its layout and styles; fill the content slots and omit unused sections. The reference defines option markup, links, and preview checks. Do not redesign the question shell each turn.
+
 Render one inline HTML question containing:
 
 - **Q1 - Question title**, followed by the question and necessary context.

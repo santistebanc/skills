@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{QUESTION_ID}} · {{TITLE}}</title>
+  <style>
+    /* Keep this shell unchanged. Host theme tokens also style future questions. */
+    html, body { margin: 0; padding: 0; background: transparent; }
+    .gp-question, .gp-question * { box-sizing: border-box; }
+    .gp-question {
+      color: var(--foreground);
+      font: 400 16px/1.5 var(--font-sans, system-ui, sans-serif);
+      overflow-wrap: anywhere;
+      padding: 8px 0;
+    }
+    .gp-question :where(h1, h2, h3, p, ol, ul, figure) { margin: 0; }
+    .gp-question :where(h1, h2, h3) { font-weight: 600; text-wrap: balance; }
+    .gp-question p { text-wrap: pretty; }
+    .gp-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    .gp-heading { display: flex; align-items: baseline; gap: 12px; }
+    .gp-id { flex: none; color: var(--muted-foreground); font-size: 14px; }
+    .gp-title { font-size: 24px; line-height: 1.3; letter-spacing: -.025em; }
+    .gp-context { margin-top: 12px; color: var(--muted-foreground); }
+    .gp-context > * + * { margin-top: 8px; }
+    .gp-label { font-size: 14px; line-height: 1.5; font-weight: 600; }
+    .gp-example, .gp-options, .gp-prototypes { margin-top: 24px; }
+    .gp-example > .gp-label, .gp-prototypes > .gp-label { margin-bottom: 12px; }
+    .gp-example-surface {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius, 8px);
+      background: var(--card);
+    }
+    .gp-caption, .gp-hint { font-size: 14px; color: var(--muted-foreground); }
+    .gp-caption { margin-top: 8px; }
+    .gp-options { list-style: none; padding: 0; }
+    .gp-option { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding: 16px 0; }
+    .gp-option + .gp-option { border-top: 1px solid var(--border); }
+    .gp-option-id { color: var(--muted-foreground); font-size: 14px; padding-top: 2px; }
+    .gp-option-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 12px; }
+    .gp-option h3 { font-size: 16px; line-height: 1.5; }
+    .gp-tag { color: var(--muted-foreground); font-size: 12px; font-weight: 500; }
+    .gp-description { margin-top: 4px; }
+    .gp-tradeoff { margin-top: 4px; font-size: 14px; color: var(--muted-foreground); }
+    .gp-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .gp-question a { color: var(--foreground); text-underline-offset: 4px; }
+    .gp-link { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius, 8px); font-size: 14px; text-decoration: none; }
+    .gp-link:hover { background: var(--secondary); }
+    .gp-question :where(a, button, input, select, summary):focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
+    .gp-recommendation { margin-top: 24px; padding: 16px; background: var(--secondary); border-radius: var(--radius, 8px); }
+    .gp-recommendation p { margin-top: 4px; }
+    .gp-hint { margin-top: 16px; }
+    /* Question content never shrinks into miniature columns on phones. */
+    @media (max-width: 420px) {
+      .gp-title { font-size: 20px; line-height: 1.4; }
+      .gp-heading { gap: 8px; }
+      .gp-option { gap: 8px; }
+      .gp-links { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <article class="gp-question" aria-labelledby="gp-title">
+    <header>
+      <div class="gp-heading">
+        <span class="gp-id">{{QUESTION_ID}}</span>
+        <h1 class="gp-title" id="gp-title">{{TITLE}}</h1>
+      </div>
+      <div class="gp-context">{{CONTEXT_HTML}}</div>
+    </header>
+
+    <!-- Optional: remove this figure when no illustration is useful. -->
+    <figure class="gp-example">
+      <h2 class="gp-label">{{EXAMPLE_TITLE}}</h2>
+      <div class="gp-example-surface">{{EXAMPLE_HTML}}</div>
+      <figcaption class="gp-caption">{{EXAMPLE_CAPTION}}</figcaption>
+    </figure>
+
+    <!-- Insert gp-option list items from the reference. Remove if not needed. -->
+    <ol class="gp-options" aria-label="Options">{{OPTIONS_HTML}}</ol>
+
+    <!-- Optional: remove this section when there are no external builds. -->
+    <section class="gp-prototypes" aria-label="Try the alternatives">
+      <h2 class="gp-label">Try the alternatives</h2>
+      <p>{{TRY_INSTRUCTION}}</p>
+      <div class="gp-links">{{LINKS_HTML}}</div>
+    </section>
+
+    <!-- Omit for factual questions. -->
+    <aside class="gp-recommendation" aria-label="Suggested answer">
+      <h2 class="gp-label">Suggested answer · {{RECOMMENDED_ID}}</h2>
+      <p>{{RECOMMENDATION_HTML}}</p>
+    </aside>
+    <p class="gp-hint">{{REPLY_HINT}}</p>
+  </article>
+</body>
+</html>
