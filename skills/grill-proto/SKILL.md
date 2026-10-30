@@ -13,19 +13,25 @@ Establish the goal and scope; ask if unclear. Focus on decisions needed for that
 
 The **frontier** contains open decisions whose prerequisites are settled. Cover it each round, in manageable batches if needed. Ask ready questions while other research or prototypes are pending. Questions depending on unanswered questions belong in later rounds.
 
-For each question, name the uncertainty. Build working prototypes automatically when trying alternatives would reveal more than text or an inline illustration; otherwise ask directly, with rich HTML when useful. Prepare one question's prototype set at a time by default.
+Before posing each question, name the uncertainty and choose the simplest useful format automatically:
+
+- **Rich HTML** for things the user needs to see or try with simple interactions, such as UI alternatives, toggles, or a small simulation.
+- **Working prototypes** for complex behavior that needs a fuller implementation or runtime, such as connected workflows or executable API examples.
+- **Text** for everything else, including questions where visuals or interaction add little.
+
+Prepare one question's prototype set at a time by default.
 
 After each round, update the tree and recompute the frontier. Revisit answers contradicted by new evidence. Clarify incomplete or ambiguous replies, including a bare "yes" to several questions, without reopening clear answers.
 
 ## Illustrate questions with rich HTML
 
-Before posing any question, check whether inline rich HTML could make the question or its options easier to understand. Render it automatically when useful and supported; use text when it adds little. This applies to direct questions and prototype questions alike.
+Use inline rich HTML to clarify the question, its options, or both. This can also supplement a complex prototype question when a preview helps.
 
 Use the smallest helpful visual: UI mockups or before/after views, a relationship diagram, or a comparison of options. For UI changes, show what the proposed changes would look like in the product's context. Keep alternatives comparable and label them with the question and option IDs. Mark inferred details and simulated behavior.
 
 Present the visual with the question's context where the host supports it; otherwise match it clearly by question ID. Keep the numbered question, tradeoffs, and recommendation readable in chat. Use the host's inline HTML tools to check and render it; a code block or file link alone does not show the visual. If rendering is unavailable, say so and continue in text.
 
-An inline mockup can answer a visual question without a separate prototype. Build working variants when the decision needs behavior the illustration cannot demonstrate. Inline previews supplement, rather than replace, each prototype's direct link.
+Simple interaction in rich HTML does not require separate prototypes. When working prototypes are needed, inline previews supplement each prototype's direct link.
 
 ## Find facts yourself
 
