@@ -5,7 +5,7 @@ Use rich HTML only for illustrations and interactions, such as the content of co
 - Use the host's font and theme colors, with transparent outer background and no outer card or side padding.
 - Default to 14px body, 16px semibold heading, 12px secondary labels, comfortable line height, and 8–16px gaps. Keep text readable on phones.
 - Prefer whitespace and quiet dividers to decorative panels, oversized headings, emoji, gradients, or shadows.
-- Give examples enough width; use a labeled switcher instead of cramped columns. Match UI examples to the product when context is available. Keep option IDs stable and label choices where they appear. Add essential explanation there rather than duplicating the options elsewhere.
+- Give examples enough width; use a labeled switcher instead of cramped columns. The depicted app uses its own styling; surrounding controls use the chat theme. Keep option IDs stable and label choices where they appear. Add essential explanation there rather than duplicating the options elsewhere.
 - Include verified prototype or app-variant links beside their examples. Explain what to try only when unclear.
 - Use labeled, keyboard-accessible controls with visible focus and usable touch targets. Local interactions do not submit answers; accept chat replies unless the host supports genuine submission.
 

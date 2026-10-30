@@ -28,6 +28,8 @@ Ask questions, give recommendations, and explain in normal chat. Use rich HTML o
 
 Forms can combine. Build only what the current question needs. For external builds, follow [references/builds.md](references/builds.md).
 
+Before making UI examples, prototypes, or app variants, inspect the relevant part of the current app through its UI or component code. Match its layout, typography, colors, spacing, controls, and behavior; change only what the decision tests. Reuse existing components and styles where practical. If the app is unavailable, use the closest available reference rather than inventing a redesign.
+
 ## Keep questions concise
 
 For visual examples, follow [references/rich-html.md](references/rich-html.md). Use guidelines, not a fixed template; keep ordinary prose outside the HTML.
