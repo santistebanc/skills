@@ -1,6 +1,6 @@
 ---
 name: grill-proto
-description: Interview the user about an idea, plan, or design, using inline rich HTML and competing working prototypes to clarify decisions. Use for visual or prototype-assisted grilling about UI, APIs, workflows, or other prototype-friendly decisions.
+description: Interview the user one question at a time through inline rich HTML, using illustrations and competing working prototypes to clarify decisions. Use for visual or prototype-assisted grilling about UI, APIs, workflows, or other prototype-friendly decisions.
 ---
 
 # Grill proto
@@ -9,29 +9,46 @@ Interview the user relentlessly until you reach a shared understanding. Map a **
 
 Establish the goal and scope; ask if unclear. Focus on decisions needed for that goal, separating blockers from details that can wait. Honor requests to pause, stop, or narrow scope.
 
-## Work in rounds
+## Ask one question at a time
 
-The **frontier** contains open decisions whose prerequisites are settled. Cover it each round, in manageable batches if needed. Ask ready questions while other research or prototypes are pending. Questions depending on unanswered questions belong in later rounds.
+The **frontier** contains open decisions whose prerequisites are settled. Choose the most useful ready decision, present one question, and wait for the user's answer. Several options may answer that question; unrelated decisions need separate turns.
 
-Before posing each question, name the uncertainty and choose the simplest useful format automatically:
+After each answer, update the tree and recompute the frontier. Clarify incomplete or ambiguous answers before advancing that decision. Revisit answers contradicted by new evidence without reopening other settled decisions. Keep each question's number on revisits; number new questions sequentially.
 
-- **Rich HTML** for things the user needs to see or try with simple interactions, such as UI alternatives, toggles, or a small simulation.
-- **Working prototypes** for complex behavior that needs a fuller implementation or runtime, such as connected workflows or executable API examples.
-- **Text** for everything else, including questions where visuals or interaction add little.
+For each question, name the uncertainty and choose the simplest useful demonstration:
 
-Prepare one question's prototype set at a time by default.
+- **Inline rich HTML** for things the user needs to see or try with simple interactions, such as UI alternatives, toggles, or a small simulation.
+- **Working prototypes** for complex behavior needing a fuller implementation or runtime, such as connected workflows or executable API examples.
+- **Words alone inside the HTML question** when illustration or interaction adds little.
 
-After each round, update the tree and recompute the frontier. Revisit answers contradicted by new evidence. Clarify incomplete or ambiguous replies, including a bare "yes" to several questions, without reopening clear answers.
+Build useful demonstrations automatically. Prepare only the current question's prototype set.
 
-## Illustrate questions with rich HTML
+## Present the whole question in rich HTML
 
-Use inline rich HTML to clarify the question, its options, or both. This can also supplement a complex prototype question when a preview helps.
+Render one inline HTML question containing:
 
-Use the smallest helpful visual: UI mockups or before/after views, a relationship diagram, or a comparison of options. For UI changes, show what the proposed changes would look like in the product's context. Keep alternatives comparable and label them with the question and option IDs. Mark inferred details and simulated behavior.
+- **Q1 - Question title**, followed by the question and necessary context.
+- Suggested options, with stable IDs such as `Q1-A` and clear tradeoffs.
+- Illustrative examples, mockups, or simple interactions when helpful.
+- Direct links to each working prototype when present, plus what to try.
+- A clearly marked **Suggested answer**, with a short reason tied to the user's goal.
+- A brief invitation to accept, choose another option, or explain a different answer.
 
-Present the visual with the question's context where the host supports it; otherwise match it clearly by question ID. Keep the numbered question, tradeoffs, and recommendation readable in chat. Use the host's inline HTML tools to check and render it; a code block or file link alone does not show the visual. If rendering is unavailable, say so and continue in text.
+For decisions, word the question so **"yes" accepts the recommendation**. For missing facts, ask directly and omit the recommendation; never invent one. Omit other sections that add nothing.
+
+Keep all question content inside the HTML, including links, examples, options, and recommendation. Use the host's tools to check and render it, rather than showing source code or only a file link. Avoid repeating the question in surrounding chat. If inline rendering is unavailable, explain briefly and present the same content in text.
+
+Make the question readable on narrow screens, with clear labels and working links. Accept replies in chat by default. Only add answer-submission controls when the host supports sending answers back; a local selection alone is not a user reply.
+
+## Illustrate clearly
+
+Use the smallest helpful visual: UI mockups or before/after views, a relationship diagram, or an option comparison. For UI changes, show the proposed appearance in the product's context. Match alternatives in task, context, and polish; label them with question and option IDs. Mark inferred details and simulated behavior.
 
 Simple interaction in rich HTML does not require separate prototypes. When working prototypes are needed, inline previews supplement each prototype's direct link.
+
+Sharpen vague terms: "By 'account', do you mean Customer or User? I suggest Customer for the paying organization. Is that right?"
+
+Test domain relationships with concrete edge cases: "A User belongs to two Customers and leaves one. Should access to the other remain?" Challenge assumptions, contradictions, and the costs of preferred choices.
 
 ## Find facts yourself
 
@@ -39,80 +56,30 @@ Find accessible facts yourself; decisions belong to the user. Dispatch a fresh-c
 
 Ask the user only for facts unavailable from those sources, such as undocumented commitments. Treat these as missing information, not choices.
 
-An investigation is an unsettled prerequisite: hold dependent questions, ask the rest now, and use findings in a later round.
+An investigation is an unsettled prerequisite: hold dependent questions and choose another ready question while it runs. If none is ready, report the pending work rather than guessing or declaring completion.
 
 Check descriptions of current behavior against relevant code. Surface contradictions: "The code cancels whole Orders; you described partial cancellation. Should partial cancellation be the intended behavior?" Separate current from desired behavior.
 
-## Ask direct questions
-
-Number all questions across rounds, retaining numbers on revisits. Separate questions with `---`.
-
-Use this format:
-
-```text
-❓ **Q1** - **<question title>**: <question body, with context or choices as needed>
-
-<Inline rich HTML illustration, when useful.>
-
-➡️ <your recommended answer and a short reason>
-
----
-
-❓ **Q2** - **<question title>**: <question body, with context or choices as needed>
-
-<Inline rich HTML illustration, when useful.>
-
-➡️ <your recommended answer and a short reason>
-```
-
-For decisions, **"yes" must accept your recommendation**, even with several choices. For missing facts, keep the heading but omit the recommendation; never invent one.
-
-Sharpen vague terms: "By 'account', do you mean Customer or User? I suggest Customer for the paying organization. Is that right?"
-
-Test domain relationships with concrete edge cases: "A User belongs to two Customers and leaves one. Should access to the other remain?" Challenge assumptions, contradictions, and the costs of preferred choices.
-
-## Ask through prototypes
+## Build working prototypes
 
 Build the smallest working comparison: two or three distinct, credible alternatives with honest benefits and costs. Use interactive UI, executable API examples, workflow simulations, or another suitable form.
 
-Use one subagent per variant, in parallel within capacity; build sequentially if unavailable. Give each the question, direction, settled constraints, shared data, expected interface, and separate owned files. The parent owns the comparison harness. Match task, context, and polish; vary what the question tests.
+Use one subagent per variant, in parallel within capacity; build sequentially if unavailable. Give each the question, direction, settled constraints, shared data, expected interface, and separate owned files. The parent owns the comparison harness.
 
 Keep prototypes separate from production behavior. Simulate external effects and label all simulated behavior. Run each variant's relevant behavior before presenting it; disclose checks you could not perform.
 
-Feedback settles preferences and requirements, not technical facts. Verify feasibility, performance, reliability, and correctness separately.
-
-Give every variant a stable ID and verified direct link. Picker links must open the named variant; API and workflow links must reach its runnable example. Show UI at realistic size and use the same scenario across variants.
+Give every variant a stable ID and verified direct link inside the question. Picker links must open the named variant; API and workflow links must reach its runnable example. Show UI at realistic size and use the same scenario across variants.
 
 Label revisions, such as `Q2-B v2`. Preserve evaluated versions and their links; record which version each answer concerns.
 
-Use this format:
-
-```text
-❓ **Q3** - **<question title>**: <the decision these prototypes help answer>
-
-<Brief context: why this matters and what differs between the prototypes.>
-
-<Inline rich HTML preview or comparison, when useful.>
-
-🧪 **Try the prototypes**: <picker link or runnable entry point>
-
-- **[Q3-A — <name>](<direct link to A>)**: <approach, benefit, and cost>
-- **[Q3-B — <name>](<direct link to B>)**: <approach, benefit, and cost>
-- **[Q3-C — <name>](<direct link to C>)**: <approach, benefit, and cost; omit if only two>
-
-**What to try**: <the same concrete task in each prototype and what to pay attention to>
-
-➡️ <your recommended variant and a short reason tied to the user's goal>
-
-Does that direction fit? You can say "yes", pick another variant, or describe what you would combine or change and why.
-```
-
 Recommend from the user's goals and observed tradeoffs. Give every alternative its strongest fair case. Seek answers to the decision, not just appearance rankings.
 
-Accept combinations, rejection, or new directions. Translate feedback into a proposed answer and explain your inference: choosing B does not endorse every detail. Resolve remaining uncertainty with focused follow-ups or revised prototypes; preserve settled parts.
+Accept combinations, rejection, or new directions. Translate feedback into a proposed answer and explain your inference: choosing B does not endorse every detail. Resolve remaining uncertainty with a follow-up question or revised prototypes; preserve settled parts.
+
+Feedback settles preferences and requirements, not technical facts. Verify feasibility, performance, reliability, and correctness separately.
 
 ## Finish
 
 Finish when needed decisions are settled or explicitly deferred by the user, with no hidden assumptions. An empty frontier is insufficient if work or blocked questions remain; surface those blockers.
 
-Summarize decisions, reasons, selected prototypes, and deferrals. Wait for confirmation of shared understanding before acting on the plan. Interview prototypes are authorized by this skill; production implementation requires the user's instruction.
+Summarize decisions, reasons, selected prototypes, and deferrals. Ask for confirmation of shared understanding as the final HTML question, then wait before acting on the plan. Interview prototypes are authorized by this skill; production implementation requires the user's instruction.
