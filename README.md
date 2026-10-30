@@ -5,6 +5,7 @@ Personal, reusable skills for coding agents. Each folder under `skills/` contain
 | Skill | Purpose | Requirements |
 | --- | --- | --- |
 | [task-mode](skills/task-mode/) | Reconcile accumulated work, route parallel tasks, choose suitable checkouts and isolation, report progress, and integrate results. | T3 delegation tools, Git, Node.js; optional `airoute` CLI |
+| [grill-proto](skills/grill-proto/) | Explore decisions through grilling, using competing working prototypes when trying alternatives would clarify the answer. | Prototype runtime for the subject; subagent tools for parallel variants (sequential fallback) |
 
 The T3 workflow skills depend on their host's tools. Installing instructions alone does not install their external CLIs, configure accounts, or add a native task mode. Task-mode continuity follows the agent's instructions and saved state; it does not install a per-prompt hook.
 
