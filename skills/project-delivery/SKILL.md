@@ -14,7 +14,9 @@ start, `delivery task show|why ID` gives context and blockers. Pass `--task ID` 
 `delivery start` when a claim attempts a task. Record decisions and handoffs with
 `delivery task note`, and add discovered work as tasks, subtasks or `blocked_by`
 links instead of leaving it in chat. Integration moves a task to review; only the
-owner's acceptance marks it done.
+owner's acceptance marks it done. The `tasks` MCP tools reach the same tasks from
+any project; search before creating, pass your thread id on writes, and set
+`owner_requested` only when the owner asked for that task (others land in `inbox`).
 
 Work on `wip/` branches. Claim a specific task with `delivery start` before edits.
 Commit intended changes frequently; installed post-commit hooks push checkpoints

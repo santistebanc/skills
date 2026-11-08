@@ -29,6 +29,16 @@ node "$HOME/my-skills/scripts/skills-sync.mjs" sync
 
 Each OS user, WSL distribution, container or remote execution host has its own installation. Using another browser/phone to access an already configured T3 server does not need another installation. This does not alter T3's configuration or inject instructions into existing threads. Invoke skills using the host's syntax, such as `$task-mode`; a running thread may need to reload a skill or start a fresh session to pick up changes.
 
+### Shared MCP servers
+
+Remote MCP servers that every agent account should see (for example a private task manager) are listed per machine, never in this public repository:
+
+```sh
+node "$HOME/my-skills/scripts/skills-sync.mjs" mcp --add tasks --url "https://<private-host>/mcp"
+```
+
+Each sync registers them at user scope in every discovered Claude config (`.claude.json`) and Codex `config.toml`, keeps other settings and an existing entry's extra keys, repairs a changed or dropped entry, skips homes that were never launched, and reports unparseable files instead of rewriting them. `mcp --remove NAME` stops future registration only. URLs must be HTTPS (plain HTTP only for loopback) without credentials.
+
 ### Scheduling
 
 - Windows: a per-user Task Scheduler job runs hidden at login and every five minutes while logged in.

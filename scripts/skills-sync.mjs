@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readJSON, writeJSON, discoverTargets, acquireLock, deploy, exists } from './sync/engine.mjs';
 import { registerSchedule, removeSchedule } from './sync/scheduler.mjs';
+import { registerMcp, validServers } from './sync/mcp.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
@@ -40,6 +41,8 @@ try {
   sync                 Fetch main and deploy updates; preserve conflicts
   status               Show local configuration and last sync evidence
   target --add PATH    Register an extra account/agent skills directory
+  mcp --add NAME --url HTTPS_URL | --remove NAME
+                       Keep a private MCP server registered in every Claude/Codex home
   unschedule           Stop automatic sync; keep installations and private state
 All commands accept --home PRIVATE_DIRECTORY (default ~/.t3-skills).
 Default discovery: ~/.agents/skills, Codex/Claude homes and detected account homes,
@@ -89,10 +92,13 @@ Use a clean dedicated checkout for sync; edit/push from a separate authoring clo
     if (!process.env.T3_SKILLS_LOCK_TOKEN || process.env.T3_SKILLS_LOCK_TOKEN !== lock.token) throw Error('Deployment must run through the locked updater');
     const c = config();
     const results = deploy(home, c.repository, targets(c));
+    let mcp = [];
+    try { mcp = registerMcp(c.userHome, c.mcpServers || {}); }
+    catch (e) { mcp = [{ state: 'error', message: e.message }]; }
     const offline = args.includes('--offline');
     const previous = readJSON(path.join(home, 'status.json'), {});
     const status = { at: new Date().toISOString(), offline, commit: exec(c.git, ['rev-parse', 'HEAD'], c.repository),
-      lastOnlineSyncAt: offline ? previous.lastOnlineSyncAt || null : new Date().toISOString(), results };
+      lastOnlineSyncAt: offline ? previous.lastOnlineSyncAt || null : new Date().toISOString(), results, mcp };
     writeJSON(path.join(home, 'status.json'), status);
     if (exists(path.join(home, 'last-error.json'))) fs.unlinkSync(path.join(home, 'last-error.json'));
     output(status);
@@ -107,6 +113,19 @@ Use a clean dedicated checkout for sync; edit/push from a separate authoring clo
       const c = config(), add = option('add');
       if (!add || !path.isAbsolute(add)) throw Error('Use target --add ABSOLUTE_SKILLS_DIRECTORY');
       c.targets = [...new Set([...c.targets, path.resolve(add)])]; writeJSON(configFile, c); output({ targets: targets(c) });
+    } finally { release(); }
+  } else if (command === 'mcp') {
+    const release = acquireLock(home);
+    try {
+      const c = config(), add = option('add'), remove = option('remove');
+      const servers = { ...(c.mcpServers || {}) };
+      if (add) servers[add] = { url: option('url') };
+      else if (remove) delete servers[remove];
+      else throw Error('Use mcp --add NAME --url HTTPS_URL or mcp --remove NAME');
+      validServers(servers);
+      c.mcpServers = servers; writeJSON(configFile, c);
+      // Removal only stops future registration; existing entries stay until removed in each tool.
+      output({ mcpServers: servers, applied: add ? registerMcp(c.userHome, { [add]: servers[add] }) : [] });
     } finally { release(); }
   } else if (command === 'unschedule') {
     const c = config(); removeSchedule(home, c); c.schedule = null; writeJSON(configFile, c); output({ unscheduled: true });
