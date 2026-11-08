@@ -28,7 +28,12 @@ export function agentHomes(userHome, env = process.env) {
   const add = (kind, dir, files) => { if (isDir(dir)) homes.push({ kind, dir: path.resolve(dir), files: files.map(f => path.resolve(f)) }); };
   const named = fs.readdirSync(userHome, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => e.name);
   const codex = new Set([env.CODEX_HOME || path.join(userHome, '.codex'), ...named.filter(n => /^\.codex(?:[-_].+)?$/.test(n)).map(n => path.join(userHome, n))].map(p => path.resolve(p)));
-  for (const dir of codex) add('codex', dir, [path.join(dir, 'config.toml')]);
+  const primaryCodex = path.resolve(env.CODEX_HOME || path.join(userHome, '.codex'));
+  for (const dir of codex) {
+    // A `.codex*` folder is an account only if it is the primary home, signed in or already configured.
+    const real = dir === primaryCodex || ['auth.json', 'config.toml'].some(f => fs.existsSync(path.join(dir, f)));
+    if (real) add('codex', dir, [path.join(dir, 'config.toml')]);
+  }
   const defaultClaude = path.resolve(userHome, '.claude');
   const claude = new Set([env.CLAUDE_CONFIG_DIR || defaultClaude, ...named.filter(n => /^\.claude(?:[-_].+)?$/.test(n)).map(n => path.join(userHome, n))].map(p => path.resolve(p)));
   for (const dir of claude) {

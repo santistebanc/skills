@@ -18,7 +18,8 @@ test('registers in every Claude and Codex home, idempotently, preserving other s
   fs.mkdirSync(path.join(home, '.claude'));
   write(path.join(home, '.claude_work', '.claude.json'), '{"projects":{}}');
   write(path.join(home, '.codex', 'config.toml'), 'model = "x"\r\n\r\n[mcp_servers.jobfeed]\r\ncommand = "a"\r\n');
-  fs.mkdirSync(path.join(home, '.codex_alt'));
+  write(path.join(home, '.codex_alt', 'auth.json'), '{}');
+  fs.mkdirSync(path.join(home, '.codex-staging-cleanup'));  // not an account
   fs.mkdirSync(path.join(home, '.claude_fresh'));  // never launched: no config yet
   const first = registerMcp(home, { tasks: { url: URL1 } }, env);
   assert.deepEqual(first.map(r => [path.relative(home, r.file), r.state]).sort(), [
@@ -30,6 +31,7 @@ test('registers in every Claude and Codex home, idempotently, preserving other s
   const toml = fs.readFileSync(path.join(home, '.codex', 'config.toml'), 'utf8');
   assert.match(toml, /\[mcp_servers\.jobfeed\]\r\ncommand = "a"\r\n\r\n\[mcp_servers\.tasks\]\r\nurl = "https:\/\/tasks\.example\.ts\.net:7443\/mcp"\r\n$/);
   assert.ok(registerMcp(home, { tasks: { url: URL1 } }, env).every(r => r.state === 'current'));
+  assert.equal(fs.existsSync(path.join(home, '.codex-staging-cleanup', 'config.toml')), false);
 }));
 
 test('updates a changed url in place and keeps extra keys', () => fixture(home => {
