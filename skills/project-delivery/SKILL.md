@@ -9,6 +9,13 @@ read their linked threads only to resolve overlap, stale ownership or unclear
 intent. `delivery threads --project ID` finds historical thread references without
 loading transcripts. Keep the full thread link, ID and environment in each claim.
 
+Planned work lives in tasks: `delivery tasks --project ID --ready` lists what can
+start, `delivery task show|why ID` gives context and blockers. Pass `--task ID` to
+`delivery start` when a claim attempts a task. Record decisions and handoffs with
+`delivery task note`, and add discovered work as tasks, subtasks or `blocked_by`
+links instead of leaving it in chat. Integration moves a task to review; only the
+owner's acceptance marks it done.
+
 Work on `wip/` branches. Claim a specific task with `delivery start` before edits.
 Commit intended changes frequently; installed post-commit hooks push checkpoints
 and confirm the remote SHA. A failed push is local work, never published work.
