@@ -45,6 +45,7 @@ for (const file of files) {
 }
 run(['--test', 'skills/task-mode/scripts/state.test.mjs']);
 run(['--test', 'skills/task-mode/scripts/quota.test.mjs']);
+run(['--test', 'skills/project-showcase/scripts/capture-lib.test.mjs']);
 run(['--test', 'scripts/sync/sync.test.mjs', 'scripts/sync/mcp.test.mjs']);
 run(['scripts/skills-sync.mjs', 'help']);
 console.log(`Validated ${skills.length} skills and ${files.length} source files; syntax, publication scan, state and sync integration tests passed.`);
