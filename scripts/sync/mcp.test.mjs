@@ -58,7 +58,7 @@ test('honours CLAUDE_CONFIG_DIR and CODEX_HOME outside the user home', () => fix
 }));
 
 test('rejects unsafe server definitions', () => {
-  assert.throws(() => validServers({ tasks: { url: 'http://beelink:7443/mcp' } }), /https/);
+  assert.throws(() => validServers({ tasks: { url: 'http://example-host:7443/mcp' } }), /https/);
   assert.throws(() => validServers({ tasks: { url: 'https://u:p@host/mcp' } }), /credentials/);
   assert.throws(() => validServers({ 'Bad Name': { url: URL1 } }), /name/);
   assert.deepEqual(validServers({ local: { url: 'http://127.0.0.1:9000/mcp' } }), [{ name: 'local', url: 'http://127.0.0.1:9000/mcp' }]);

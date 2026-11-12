@@ -72,9 +72,9 @@ test('recovers a crash after the old deployment moves aside', () => fixture(root
 }));
 
 test('discovers account homes and enforces a single updater', () => fixture(root => {
-  for (const name of ['.claude_mush', '.codex-work', '.cursor', '.unrelated']) fs.mkdirSync(path.join(root, name));
+  for (const name of ['.claude_work', '.codex-work', '.cursor', '.unrelated']) fs.mkdirSync(path.join(root, name));
   const targets = discoverTargets(root, {});
-  assert(targets.includes(path.join(root, '.claude_mush', 'skills')));
+  assert(targets.includes(path.join(root, '.claude_work', 'skills')));
   assert(!targets.includes(path.join(root, '.unrelated', 'skills')));
   const release = acquireLock(root);
   assert.throws(() => acquireLock(root), /Another sync/);

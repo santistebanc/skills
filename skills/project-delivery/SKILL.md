@@ -1,6 +1,6 @@
 ---
 name: project-delivery
-description: Coordinate development across the owner's registered projects: claim work with thread references, checkpoint working branches, prepare verified slices, integrate exact owner-approved candidates, and prepare explicit releases using the private Beelink delivery coordinator.
+description: Coordinate development across the owner's registered projects: claim work with thread references, checkpoint working branches, prepare verified slices, integrate exact owner-approved candidates, and prepare explicit releases using the private delivery coordinator.
 ---
 
 Use `delivery --help`, `delivery projects` and `delivery work --project ID` before
