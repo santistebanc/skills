@@ -5,6 +5,7 @@
     {"id": "project-showcase", "name": "Project showcase", "about": "README pictures and demo clips", "paths": ["skills/project-showcase"], "links": []},
     {"id": "task-mode", "name": "Task mode", "about": "Routes tasks and checks quota in T3", "paths": ["skills/task-mode"], "links": []},
     {"id": "sync", "name": "Sync scripts", "about": "Copy the skills to each agent", "paths": ["scripts"], "links": []},
+    {"id": "decisions", "name": "Decision records", "about": "Short records of app standard decisions", "paths": ["docs/adr"], "links": []},
     {"id": "docs", "name": "Docs and setup", "about": "README, license and package file", "paths": ["README.md", "LICENSE", "package.json"], "links": []}
   ]
 }
