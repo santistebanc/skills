@@ -2,7 +2,7 @@
 
 Input for #84 (the written standard) and #83 (how the standard ships). It records what the owner's projects already do in each area of #81, with file paths, so the standard copies working code instead of inventing rules. It does not recommend rules; the "best reference" lines and the stack summary are inputs for #83 and #84 to confirm.
 
-Surveyed 2026-11-09, read-only, from the repos under `C:\Users\santi\code\`. All paths below are relative to that project's root unless they start with `docs/research` or `research`. Reuses `research/design-taste-profile.md`, `research/design-skills-survey.md` and `docs/research/test-suite-audit.md` (project-delivery, task #41) rather than repeating them.
+Surveyed 2026-11-09, read-only, from the local code folder that holds the project checkouts. All paths below are relative to that project's root unless they start with `docs/research` or `research`. Reuses `research/design-taste-profile.md`, `research/design-skills-survey.md` and `docs/research/test-suite-audit.md` (project-delivery, task #41) rather than repeating them.
 
 **Maturity scale.** **Strong** = works, is enforced or documented, and could be copied. **Partial** = real but narrow, manual or undocumented. **Basic** = a trace of it. **None** = nothing found. A grep for a keyword that finds nothing means "none found", not proof of absence.
 
@@ -11,7 +11,7 @@ Surveyed 2026-11-09, read-only, from the repos under `C:\Users\santi\code\`. All
 1. **Splitnext is the reference for almost every area, but it is not a React + Vite app.** Its client is Expo 57 / React Native 0.86 rendered to the web with react-native-web and Expo Router (`apps/client/package.json`, ADR 0013). Only the Worker side is plain TypeScript (Hono on Cloudflare Workers, D1, SQLite Durable Objects). Its component catalog, tokens and `.web.tsx` platform variants are tied to React Native primitives. Its showcase, lab, deploy script, check tiers, lint and hooks are not.
 2. **Four areas have no implementation anywhere:** automated accessibility checks (no axe), performance and bundle budgets (no Lighthouse, no size limits), dependency automation (no Renovate, no Dependabot, no `npm audit` in any workflow), and feature flags. i18n is also absent: the only trace is `lang="en"`.
 3. **Before/after evidence is not built into any project.** Splitnext records only the "after" (the showcase). Flyscan's verification records are the closest thing to a comparable baseline for non-visual changes. The standard will have to get this from the delivery workflow, not from a project.
-4. **No project has all three of preview, staging and production.** Splitnext has staging only (production is a placeholder id). Rankzap deploys straight to production on push to `main`. OV Berlin has staging on the Beelink and production on GitHub Pages. Nothing deploys a preview per `wip/` branch.
+4. **No project has all three of preview, staging and production.** Splitnext has staging only (production is a placeholder id). Rankzap deploys straight to production on push to `main`. OV Berlin has staging on a home server and production on GitHub Pages. Nothing deploys a preview per `wip/` branch.
 5. **Observability is home-grown, and Splitnext's version is the good one.** No project uses Sentry or product analytics; Splitnext deliberately has none ("no analytics on how people use the app", `docs/operations.md`).
 
 ## Projects surveyed
@@ -25,13 +25,13 @@ Surveyed 2026-11-09, read-only, from the repos under `C:\Users\santi\code\`. All
 | SQ | `snapquiz` | AI party quiz on a TV with phones | 140 commits, no CI |
 | PF | `portfolio` | Public portfolio site | 38 commits |
 | TR | `treem` | Declarative state-management library plus example apps | 30 commits |
-| CD | `career-desk` | Private career record with an agent-first CLI and a read-only UI | 6 commits |
+| CD | a private command-line tool | Private record keeper with an agent-first CLI and a read-only UI | 6 commits |
 
 ## Matrix
 
 Cells say what exists in a few words. Details, paths and evidence are in the per-area notes below.
 
-| Area | SN splitnext | FS flyscan | OV berlin-cinema | RZ rankzap | SQ snapquiz | PF portfolio | TR treem | CD career-desk |
+| Area | SN splitnext | FS flyscan | OV berlin-cinema | RZ rankzap | SQ snapquiz | PF portfolio | TR treem | CD private CLI |
 |---|---|---|---|---|---|---|---|---|
 | **1. Design system and tokens** | **Strong**: `tokens.ts`, 13 `design/` files, role-named colours | Partial: 34 CSS vars, one file | **Strong** (documented): `DESIGN.md` + `DESIGN.json`, Tailwind tokens | Partial: Tailwind 4 `@theme` + 16 poll palettes | Partial: shadcn base, 77 CSS vars | Partial: 63 CSS vars, day/night themes | None | Basic: 6 CSS vars |
 | **2. Component reuse and lab** | **Strong**: `/components` catalog (1,085 lines) + device lab | None | Basic: 7 `components/ui/` primitives | Partial: `_harness/` component pages | None (shadcn `components/ui`) | None | Partial: `examples/` + devtool | None |
@@ -40,9 +40,9 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 | **5. Seed data and demo mode** | **Strong**: `workbench/` fixtures feed catalog, lab, tests | **Strong** (network): `tests/recordings/` replay | Partial: `pipeline/*-fixtures.ts`, `seed-audit` | Partial: demo polls seeded over WS | None | Partial: `src/data/projects.ts` | None | Partial: fictional UI-test thread |
 | **6. Test tiers** | **Strong**: `check:fast` (pre-push) / `check` (CI) | Strong: pre-commit + 5 test suites, 5 CI jobs | Partial: one `npm test` tier, 33 ts-node scripts | None | None | Partial: unit + `test:ui` | Partial: 113 tests, not in CI | Partial: unit + `test:ui` |
 | **7. Budgets (perf, a11y, bundle)** | Partial: `storageBudget` test only | None | None | Basic: `check-contrast.mjs` | None | Partial: overflow check, 4 widths × 2 themes | None | None |
-| **8. Environments and CI/CD** | **Strong** staging: `wrangler` env + `deploy.mjs`; no prod | **Strong** release: `Release` workflow, signed updater | **Strong**: tag → Beelink → Pages; staging on Beelink | Partial: push-to-main → prod | Partial: `deploy.js`, no CI | Partial: PR checks + Pages deploy | Partial: Pages deploy of examples | Partial: checks only |
+| **8. Environments and CI/CD** | **Strong** staging: `wrangler` env + `deploy.mjs`; no prod | **Strong** release: `Release` workflow, signed updater | **Strong**: tag → home server → Pages; staging on home server | Partial: push-to-main → prod | Partial: `deploy.js`, no CI | Partial: PR checks + Pages deploy | Partial: Pages deploy of examples | Partial: checks only |
 | **9. Observability** | **Strong**: request ids, `/client-errors`, `/health`, `/ready`, debug routes | Basic: logging, build identity | Partial: audit log, `notify()` hook, build stamp | Basic: Workers `observability` on | None | None | None | None |
-| **10. Secrets** | Partial: none in repo; Cloudflare login | **Strong**: gitleaks hook, signing key in GH secrets | **Strong**: documented `.env.example`, Beelink `secrets.env` | Partial: GH secrets, deploy skips if unset | Partial: `.env.example`, gitignored | **Strong**: `public-files.json` allowlist | None needed | Partial: `private/` gitignored |
+| **10. Secrets** | Partial: none in repo; Cloudflare login | **Strong**: gitleaks hook, signing key in GH secrets | **Strong**: documented `.env.example`, home-server `secrets.env` | Partial: GH secrets, deploy skips if unset | Partial: `.env.example`, gitignored | **Strong**: `public-files.json` allowlist | None needed | Partial: `private/` gitignored |
 | **11. Dependency hygiene** | Partial: pinned `overrides`, type-aware lint | Partial: SHA-pinned actions, `uv.lock`, pinned hook revs | Basic: `npm ci`, `.nvmrc`, engines | Partial: exact pins, but lockfile drift broke deploys | None | None | None | None |
 | **12. Repo knowledge** | **Strong**: AGENTS.md, CONTEXT.md, 30 ADR files, spec, architecture, ops | **Strong**: AGENTS.md, GLOSSARY, CODING_STANDARDS | Strong: PRODUCT/DESIGN.md, `docs/agents/`, 7 docs | Partial: long README | Partial: README | Partial: README | Partial: README, INTERNALS.md | **Strong**: AGENTS.md, CONTEXT.md, ADR 0001 |
 | **13. UX baseline** | Partial: PWA offline shell, reduced motion, light only, 166 a11y attrs | Partial: dark only, reduced motion | Partial: PWA + dark only, `lang=en` | Partial: reduced motion, light only | None | **Strong**: system + manual theme, reduced motion, overflow | None | Partial: skip link, focus-visible |
@@ -76,7 +76,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 ### 3. Flows showcase
 
 - **SN** `showcase/`: `capture.spec.ts` drives 11 named flows (`start`, `expenses`, `people`, `settle`, `invite`, `join`, `realtime`, `history`, `offline`, `leave`, `big`) on a 390×844 phone viewport. It records one video per flow with an injected cursor and captions, takes screenshots at key moments, and logs steps. `cases.spec.ts` spotlights every conditional element (empty, offline, failure, conflict) by area, and a case that cannot be reached is saved as "missing" with the reason. `build.mjs` turns `showcase/out/` into `index.html`. Run with `npm run showcase`. It starts its own Worker on port 8793 with fresh state (`showcase/playwright.config.ts`), so it is deterministic. Output is not committed (20 MB locally).
-- **RZ**: `design-explorations/_harness/capture-screens.mjs` and `capture-readme.mjs` seed demo polls over the poll server's WebSocket, then screenshot for the README and portfolio. Screenshots only, no flows, and it imports Playwright from the `career-desk` checkout by absolute path.
+- **RZ**: `design-explorations/_harness/capture-screens.mjs` and `capture-readme.mjs` seed demo polls over the poll server's WebSocket, then screenshot for the README and portfolio. Screenshots only, no flows, and it imports Playwright from another local checkout by absolute path.
 - **OV**: `scripts/screenshot.ts` (`npm run screenshots`) captures five README screenshots from the live or local site at desktop and mobile sizes, in dark scheme.
 - **PF, CD**: `tools/ui-check.mjs` and `tests/ui-check.mjs` are Playwright walkthroughs that assert, not record. The skills repo already has the README and showcase-media skill (`project-showcase`, task #23), which is the capture standard for README media.
 - **FS, SQ, TR**: static screenshots only (`docs/screenshots/`, `docs/screenshot.png`, `docs/brew-shop.png`).
@@ -96,7 +96,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 - **FS**: `tests/fixtures/` and `tests/recordings/` replayed by `backend/src/transport.ts`; `FLYSCAN_OFFLINE=1` is set for tests and verification, and the replay "fails loudly on an unrecorded URL". `AGENTS.md` makes offline mode the default. Best network-replay pattern.
 - **OV**: `pipeline/evaluation-fixtures.ts`, `pipeline/rollout-fixtures.ts`, `scripts/seed-audit.ts` (baselines the audit log from the published snapshot on build), and `public/movies.json` committed as data. Seeds are test data for a pipeline, not UI demo data.
 - **RZ**: demo polls seeded for screenshots (`capture-screens.mjs`), `design-explorations/_harness/live-test-room.json`.
-- **PF**: content records in `src/data/projects.ts`; `src/career-content.json` as an approved override layer from career-desk.
+- **PF**: content records in `src/data/projects.ts`; `src/career-content.json` as an approved override layer from a private tool.
 - **CD**: `tests/ui-check.mjs` uses a fictional thread id so no private data reaches tests.
 
 ### 6. Test tiers
@@ -126,7 +126,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 |---|---|---|---|---|
 | SN | None | **`env.staging` in `wrangler.jsonc`**: own Worker `splitnext-api-staging`, own D1 (`splitnext-staging-index`), own Durable Objects | Placeholder D1 id; not deployed | Manual `npm run deploy:staging` (`scripts/deploy.mjs`) |
 | FS | None | None | GitHub Release of signed Tauri updater assets for Windows, macOS, Linux | `Release` workflow (`workflow_dispatch`, version and notes inputs) |
-| OV | None | Beelink build of `origin/main` with production data, served on :4174 over Tailscale (`ops/beelink/ovberlin.sh staging`, `preview.allowedHosts`) | GitHub Pages (`publish.yml`) | `npm run release` tags `v*`, the Beelink poller deploys within 5 minutes |
+| OV | None | Home-server build of `origin/main` with production data, served over a private network by the home-server runner script | GitHub Pages (`publish.yml`) | `npm run release` tags `v*`, the home-server poller deploys within 5 minutes |
 | RZ | None | None | Cloudflare Worker, `rankzap.site` (`wrangler.jsonc` routes) | Push to `main` (`deploy.yml`) |
 | SQ | None | None | PartyKit (`scripts/deploy.js`) | Manual |
 | PF | None | None | GitHub Pages (`deploy.yml`) | Push to `main`; PR checks in `checks.yml` |
@@ -137,7 +137,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 - **FS `release.yml`**: all actions pinned to commit SHAs; a first job refuses to tag until every release destination is configured; version bump and tag are one job; per-OS build matrix; updater assets are signed (`TAURI_SIGNING_PRIVATE_KEY`). Releases only on the owner's request (`AGENTS.md`).
 - **RZ `deploy.yml`**: skips quietly when `CLOUDFLARE_API_TOKEN` is unset. The audit found 11 of 38 runs failing on lockfile drift.
 - **OV** also publishes via an artifact-in-a-release hand-off (`site-live` release downloaded by `publish.yml`); nothing is committed.
-- Migrations: forward-only D1 migrations (SN), none elsewhere. Backups: SN documents D1 Time Travel and Durable Object point-in-time recovery in `docs/operations.md` but admits the group-restore path does not exist yet; OV keeps the last 20 pre-run state copies (`backup_state` in `ovberlin.sh`).
+- Migrations: forward-only D1 migrations (SN), none elsewhere. Backups: SN documents D1 Time Travel and Durable Object point-in-time recovery in `docs/operations.md` but admits the group-restore path does not exist yet; OV keeps the last 20 pre-run state copies (`backup_state` in the home-server runner script).
 
 ### 9. Observability
 
@@ -149,7 +149,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
   - `GET /health` returns the deployed commit (`DEPLOY_SHA`); `GET /ready` checks D1 and the Durable Object.
   - `ENABLE_DEBUG_INSPECTION` is a `wrangler.jsonc` var (false in every deployed environment), set true by `npm run dev`, the lab and Playwright; `src/routes/debug.ts` returns 404 for `/debug/*` unless true. Tested in `test/identities.test.ts`.
   - `docs/operations.md` has the monitoring, backup and release checklist.
-- **OV**: `api/audit-log.ts` and `public/audit/` (provenance for every published value), a `notify()` webhook in `ovberlin.sh` (`NOTIFY_URL`), and `__BUILD_VERSION__` (git hash and time) in the footer.
+- **OV**: `api/audit-log.ts` and `public/audit/` (provenance for every published value), a `notify()` webhook in the home-server runner script (`NOTIFY_URL`), and `__BUILD_VERSION__` (git hash and time) in the footer.
 - **FS**: plain application logging, `desktop/src/BuildIdentity.tsx`, Tauri updater version; no remote error reporting.
 - **RZ**: `observability.enabled` in `wrangler.jsonc` only.
 - No project uses Sentry (the `siSentry` hit in PF is an icon), analytics, or tags errors with release versions beyond SN's `revision`.
@@ -157,7 +157,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 ### 10. Secrets
 
 - **FS**: `gitleaks` in `.pre-commit-config.yaml` (also runs in CI through pre-commit); `TAURI_SIGNING_PRIVATE_KEY` as a GitHub secret; `AGENTS.md` bans live requests that risk IP bans.
-- **OV** `.env.example` documents every key with where to get it and a rule: "Keep every key server-side (never use a VITE_ prefix)", "keep the real key only in .env / GitHub secrets". The Beelink runner sources `$OVB_ROOT/secrets.env` outside the repo. Decision-model spend is capped in config (`DECISION_MONTHLY_USD_LIMIT`).
+- **OV** `.env.example` documents every key with where to get it and a rule: "Keep every key server-side (never use a VITE_ prefix)", "keep the real key only in .env / GitHub secrets". The home-server runner reads `secrets.env` from outside the repo. Decision-model spend is capped in config (`DECISION_MONTHLY_USD_LIMIT`).
 - **PF** `public-files.json` allowlist plus `tools/check-public.mjs` (fails on any unreviewed file in `public/`, on German CVs, on names matching private patterns): a guard against publishing private data, run in CI.
 - **RZ** `deploy.yml` reads `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from repository secrets. **SQ** has `.env.example` (OpenAI key) with `.env` untracked. **CD** gitignores `private/`, `.env`, `profile.json`, `dashboard.json`, `output/`.
 - **SN** keeps no secrets in the repo (device credentials are generated per installation and stored as hashes; invite tokens are stored as hashes, ADR 0009), and uses local Cloudflare login for deploys. Its `AGENTS.md` makes production deployment and remote data changes an explicit owner decision.
@@ -169,14 +169,14 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 - **FS**: actions pinned by SHA with version comments, `uv.lock`, pre-commit hook revs pinned, Rust `Cargo.lock`.
 - **SN**: `overrides` pin `react`, `react-dom` and `react-native` (`package.json`); lockfile; `.nvmrc`; `wrangler types --check` fails when generated types drift from the config.
 - **RZ**: exact versions (no `^`) for most dependencies, yet the lockfile drifted from `package.json` and broke 11 deploys.
-- **OV**: `.nvmrc` and `engines.node: 24.x`; the Beelink reinstalls only when the lockfile hash changes.
+- **OV**: `.nvmrc` and `engines.node: 24.x`; the home server reinstalls only when the lockfile hash changes.
 - Most workflows use floating `actions/*@v4`/`@v5` tags except FS.
 
 ### 12. Repo knowledge
 
 - **SN** (best): `AGENTS.md` is a short index: "Read these before changing behavior", the working agreement, boundaries, and links to `CONTEXT.md` (domain language with `_Avoid_` lists), `docs/product-spec.md`, `docs/architecture.md`, `docs/operations.md`, `docs/support-playbook.md`, 30 ADR files (numbered 0001–0029; 0020 is used twice) in `docs/adr/` and `docs/agents/{domain,issue-tracker,device-lab}.md`. The README has a check table mapping each test file to what it guarantees. "If a decision changes, update the relevant document in the same slice."
-- **FS**: `AGENTS.md` (offline rule, how to show a change on the Beelink, check commands), `GLOSSARY.md`, `CODING_STANDARDS.md` (15 numbered rules "describing what the code already does"; its Python rules are partly stale, since the scraper moved to the TS backend), `CLAUDE.md`.
-- **CD**: `AGENTS.md`, `CONTEXT.md`, `docs/adr/0001-agent-first-rebuild.md`, `skills/career-profile-builder`. **OV**: `AGENTS.md` (skill config only), `PRODUCT.md`, `DESIGN.md`, `docs/agents/`, pipeline docs. **TR**: `INTERNALS.md`; its `AGENTS.md` only holds a generated "graphify" block. **RZ, SQ, PF**: README only (PF's README is accurate and detailed; RZ's is long; SQ's is a product description).
+- **FS**: `AGENTS.md` (offline rule, how to show a change on a home server, check commands), `GLOSSARY.md`, `CODING_STANDARDS.md` (15 numbered rules "describing what the code already does"; its Python rules are partly stale, since the scraper moved to the TS backend), `CLAUDE.md`.
+- **CD**: `AGENTS.md`, `CONTEXT.md`, `docs/adr/0001-agent-first-rebuild.md`, a project skill. **OV**: `AGENTS.md` (skill config only), `PRODUCT.md`, `DESIGN.md`, `docs/agents/`, pipeline docs. **TR**: `INTERNALS.md`; its `AGENTS.md` only holds a generated "graphify" block. **RZ, SQ, PF**: README only (PF's README is accurate and detailed; RZ's is long; SQ's is a product description).
 - Stale docs seen: OV `README.md` still lists a "Dark / light theme" though the app is dark only (`index.html` has `class="dark"`, no toggle).
 
 ### 13. UX baseline
@@ -230,7 +230,7 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 |---|---|---|---|---|---|
 | SN | **Expo 57 / React Native 0.86 + react-native-web**, Expo Router, React 19.2 | **Hono + zod-openapi on Cloudflare Workers; D1; SQLite Durable Object per group** | TS 7, npm workspaces, wrangler 4, oxlint 1.83, Node via `.nvmrc` | vitest 4 (Workers pool), fast-check, Playwright, `node --test` (lab) | Cloudflare (staging) |
 | FS | React 19 + Vite 6, inside **Tauri 2** (Rust) | **TS backend** (Node CLI + local API, bundled to CJS) plus one Python curl-transport helper (`flyscan/transport.py`, uv, ruff) | tsc, esbuild, pre-commit | `tsx --test` / `node --test` (backend, desktop, packaging), replay verification | GitHub Releases (signed updater) |
-| OV | React 19 + **Vite 7** + Tailwind 3 + react-router 7 + vite-plugin-pwa | Static JSON; ts-node pipeline (cheerio, zod) on a Beelink | tsc, Node 24 | ts-node scripts (~33), no browser tests | **GitHub Pages** + Beelink |
+| OV | React 19 + **Vite 7** + Tailwind 3 + react-router 7 + vite-plugin-pwa | Static JSON; ts-node pipeline (cheerio, zod) on a home server | tsc, Node 24 | ts-node scripts (~33), no browser tests | **GitHub Pages** + home server |
 | RZ | React 19 + **Vite 8** + Tailwind 4 + react-router 7, dnd-kit | **Cloudflare Worker + SQLite Durable Object** via `@cloudflare/vite-plugin` | TS 6 | none | **Cloudflare Workers** (production only) |
 | SQ | React 19 + esbuild via PartyKit + Tailwind 3 + shadcn/Radix + zustand + framer-motion | **PartyKit** (Cloudflare Durable Objects) + OpenAI + R2 | Node 20 | none | PartyKit |
 | PF | React 19 + **Vite 8**, no router | Static | TS 5.7, Node 22 | `node --test`, Playwright script | **GitHub Pages** |
@@ -269,5 +269,5 @@ Cells say what exists in a few words. Details, paths and evidence are in the per
 - Read-only: directory listings, config, workflow files, package manifests, scripts and docs; targeted `grep` for keywords (`sentry`, `i18n`, `axe`, `lighthouse`, `renovate`, `dependabot`, feature-flag terms, `prefers-color-scheme`, service worker). Test counts and timings come from the existing test audit and were not re-measured.
 - Nothing was run (no installs, builds, deploys, tests or showcases). Maturity ratings are from reading the files, not from executing them.
 - CI/CD detail comes from the workflow files in the repos. Run history and secrets configured in GitHub or Cloudflare were not inspected, so "uses secret X" means "the workflow references it".
-- `career-desk` has no examined deploy; its UI is a local read-only view. `treem` is a library and several areas do not apply.
+- CD has no examined deploy; its UI is a local read-only view. `treem` is a library and several areas do not apply.
 - The generated `.audit-*.log`, `.motion-*.log` and `.verification*.log` files in the Splitnext root are untracked agent output and were ignored.
