@@ -10,7 +10,7 @@ status: accepted
 - **Data store.** The shared base uses Cloudflare D1 for normal stored data and Durable Objects for live, shared state, as Splitnext does. Another store needs a reason in the app's README.
 - **Styling.** Web-only apps style pages with Tailwind classes that read the generated token CSS variables (ADR 0003). Tailwind does not define its own colors, spacing or type sizes.
 - **Existing apps.** An app on another stack moves to the standard stack only when a large change to it is due anyway. No app moves only to follow the standard.
-- Desktop apps, libraries and command-line tools do not fit either UI track. They will get smaller versions of the shared base later. Until then they keep their current stack and use the parts of the base that fit them, such as lint rules, git hooks and repo docs.
+- **Desktop apps, libraries and command-line tools** do not fit either UI track. Each kind gets a smaller version of the shared base the first time a project of that kind has a large change. That version contains only the parts of the base that fit it. Until then these projects keep their current stack and use the parts of the base that fit them, such as lint rules, git hooks and repo docs.
 - An app that uses a different stack keeps the shared base wherever the base works on that stack.
 
 ## Considered options
@@ -19,9 +19,4 @@ status: accepted
 - **No default data store; each app chooses.** Rejected: the base, monitoring and tests would need a version for each store.
 - **Plain CSS variables without Tailwind.** Rejected: more hand-written CSS for each app, and agents write Tailwind well.
 - **Move all existing apps one by one, or never move them.** Rejected: moving working apps only for the standard costs time with no gain for users; never moving them keeps old stacks forever.
-
-## Open points
-
-These need an owner decision. They are not decided by this ADR.
-
-1. **Variant timing.** When the desktop, library and command-line versions of the base are made, and what each one contains.
+- **Build the desktop, library and command-line versions of the base now.** Rejected: without a project that needs them, their content would be guesses.
