@@ -29,7 +29,7 @@ jobs:
 
 - Each stage line is `id: command`. Stages run in order and stop at the first failure.
 - `install` (default `npm ci --ignore-scripts`) fails when the lock file is out of date.
-- The `audit` job fails on high or critical `npm audit` findings. Turn it off on the second call so it runs once.
+- The `audit` job fails on high or critical `npm audit` findings. Turn it off on the second call so it runs once. `audit-allow` lists advisory ids that have no fixed version yet; they show as warnings. Write why next to the call, and remove the id when a fix exists.
 - `result` runs after the stages, also on failure, with `CHECK_OUTCOME` and `CHECK_STEPS` (the outcome of `install` and of each stage). `evidence-path` keeps files for 7 days.
 
 ## Deploys: `.github/workflows/app-deploy.yml`

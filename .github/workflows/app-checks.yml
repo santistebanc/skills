@@ -34,6 +34,10 @@ on:
         description: Also run the security audit job (fails on high or critical findings).
         type: boolean
         default: true
+      audit-allow:
+        description: Advisory ids (GHSA-...) that have no fixed version yet; reported as warnings, not failures. Say why next to the call.
+        type: string
+        default: ''
       node-version-file:
         type: string
         default: .nvmrc
@@ -126,4 +130,27 @@ jobs:
         with:
           node-version-file: ${{ inputs.node-version-file }}
       - name: Security audit (fails on high or critical findings)
-        run: npm audit --audit-level=high
+        env:
+          ALLOW: ${{ inputs.audit-allow }}
+        run: |
+          npm audit --json > "$RUNNER_TEMP/audit.json" || true
+          node -e '
+          const report = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+          if (report.error) { console.log(`::error::npm audit failed: ${report.error.summary}`); process.exit(1); }
+          const allowed = new Set((process.env.ALLOW || "").split(/[\s,]+/).filter(Boolean));
+          const found = new Map();
+          for (const [name, v] of Object.entries(report.vulnerabilities || {}))
+            for (const via of v.via) if (typeof via === "object" && ["high", "critical"].includes(via.severity)) {
+              const id = String(via.url || via.source).split("/").pop();
+              found.set(id, { ...(found.get(id) || { packages: [] }), title: via.title, severity: via.severity });
+              found.get(id).packages.push(name);
+            }
+          let failed = false;
+          for (const [id, f] of found) {
+            const line = `${f.severity} ${id} ${f.title} (${[...new Set(f.packages)].join(", ")})`;
+            if (allowed.has(id)) console.log(`::warning::Allowed advisory: ${line}`);
+            else { console.log(`::error::${line}`); failed = true; }
+          }
+          console.log(`${found.size} high or critical advisories, ${[...found.keys()].filter((id) => !allowed.has(id)).length} not allowed`);
+          process.exit(failed ? 1 : 0);
+          ' "$RUNNER_TEMP/audit.json"
