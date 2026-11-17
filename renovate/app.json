@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Library updates for apps that follow docs/app-standard.md: one grouped pull request a week for minor and patch updates, one pull request for each major update.",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "Europe/Berlin",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "rangeStrategy": "auto",
+  "lockFileMaintenance": { "enabled": true, "schedule": ["before 6am on monday"] },
+  "vulnerabilityAlerts": { "enabled": true, "schedule": ["at any time"] },
+  "packageRules": [
+    {
+      "description": "Minor and patch updates together, once a week.",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "weekly minor and patch updates"
+    },
+    {
+      "description": "Each major update alone, so its changes can be read.",
+      "matchUpdateTypes": ["major"],
+      "groupName": null
+    }
+  ]
+}

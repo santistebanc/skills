@@ -6,6 +6,7 @@
     {"id": "task-mode", "name": "Task mode", "about": "Routes tasks and checks quota in T3", "paths": ["skills/task-mode"], "links": []},
     {"id": "sync", "name": "Sync scripts", "about": "Copy the skills to each agent", "paths": ["scripts"], "links": []},
     {"id": "decisions", "name": "App standard", "about": "The app standard and its decision records", "paths": ["docs/adr", "docs/app-standard.md"], "links": []},
+    {"id": "app-ci", "name": "Shared checks and deploys", "about": "Reusable CI and deploy workflows and the Renovate preset for apps", "paths": [".github/workflows/app-checks.yml", ".github/workflows/app-deploy.yml", "renovate", "docs/app-ci.md"], "links": ["decisions"]},
     {"id": "docs", "name": "Docs and setup", "about": "README, license and package file", "paths": ["README.md", "LICENSE", "package.json"], "links": []}
   ]
 }

@@ -1,0 +1,129 @@
+# Shared check job for apps that follow docs/app-standard.md (see docs/app-ci.md).
+# An app calls it once per check level, for example:
+#
+#   jobs:
+#     check:
+#       uses: santistebanc/skills/.github/workflows/app-checks.yml@<commit>
+#       with:
+#         stages: |
+#           checks: npm run check:fast
+#
+# Each stage line is "id: command". Stages run in order and stop at the first
+# failure; later stages are reported as skipped. The result command receives
+# CHECK_OUTCOME and CHECK_STEPS (JSON in the shape of the `steps` context:
+# {"install": {"outcome": "success"}, "<id>": {...}}), so an app can write
+# its own result record. Pin the call to a commit, like every action here.
+name: App checks
+
+on:
+  workflow_call:
+    inputs:
+      stages:
+        description: 'One "id: command" line per stage.'
+        type: string
+        required: true
+      install:
+        description: Install command; npm ci fails when the lock file and package.json disagree.
+        type: string
+        default: npm ci --ignore-scripts
+      browsers:
+        description: Install the Playwright Chromium shell as part of the install step.
+        type: boolean
+        default: false
+      audit:
+        description: Also run the security audit job (fails on high or critical findings).
+        type: boolean
+        default: true
+      node-version-file:
+        type: string
+        default: .nvmrc
+      timeout-minutes:
+        type: number
+        default: 20
+      env:
+        description: Extra environment variables, one NAME=value per line.
+        type: string
+        default: ''
+      result:
+        description: Optional command that runs after the stages, also when they fail.
+        type: string
+        default: ''
+      evidence-path:
+        description: Optional files to keep for 7 days as the check's evidence.
+        type: string
+        default: ''
+      evidence-name:
+        type: string
+        default: check-evidence
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: ${{ inputs.node-version-file }}
+          cache: npm
+      - name: Environment
+        if: inputs.env != ''
+        env:
+          LINES: ${{ inputs.env }}
+        run: printf '%s\n' "$LINES" | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' >> "$GITHUB_ENV"
+      - id: install
+        env:
+          INSTALL: ${{ inputs.install }}
+          BROWSERS: ${{ inputs.browsers }}
+        run: |
+          bash -eo pipefail -c "$INSTALL"
+          if [ "$BROWSERS" = true ]; then npx playwright install --with-deps --only-shell chromium; fi
+      - id: stages
+        env:
+          STAGES: ${{ inputs.stages }}
+        run: |
+          record() { node -e 'const fs=require("fs"),[f,id,o]=process.argv.slice(1);const r=JSON.parse(fs.readFileSync(f,"utf8"));r[id]={outcome:o};fs.writeFileSync(f,JSON.stringify(r))' "$RUNNER_TEMP/stages.json" "$1" "$2"; }
+          echo '{}' > "$RUNNER_TEMP/stages.json"
+          failed=0
+          while IFS= read -r line; do
+            [ -z "${line//[[:space:]]/}" ] && continue
+            id="${line%%:*}"; command="${line#*:}"
+            if ! [[ "$id" =~ ^[A-Za-z][A-Za-z0-9_-]*$ ]] || [ "$id" = "$line" ]; then echo "::error::Bad stage line: $line"; exit 2; fi
+            if [ "$failed" = 1 ]; then record "$id" skipped; continue; fi
+            echo "::group::$id"
+            if bash -eo pipefail -c "$command"; then record "$id" success; else record "$id" failure; failed=1; echo "::error::Stage $id failed"; fi
+            echo "::endgroup::"
+          done <<< "$STAGES"
+          exit "$failed"
+      - if: always() && inputs.result != ''
+        env:
+          RESULT: ${{ inputs.result }}
+          CHECK_OUTCOME: ${{ job.status }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+        run: |
+          [ -f "$RUNNER_TEMP/stages.json" ] || echo '{}' > "$RUNNER_TEMP/stages.json"
+          CHECK_STEPS="$(node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log(JSON.stringify({install:{outcome:process.argv[2]},...r}))' "$RUNNER_TEMP/stages.json" "$INSTALL_OUTCOME")"
+          export CHECK_STEPS
+          bash -eo pipefail -c "$RESULT"
+      - if: always() && inputs.evidence-path != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ inputs.evidence-name }}
+          path: ${{ inputs.evidence-path }}
+          if-no-files-found: warn
+          retention-days: 7
+
+  audit:
+    if: inputs.audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: ${{ inputs.node-version-file }}
+      - name: Security audit (fails on high or critical findings)
+        run: npm audit --audit-level=high
